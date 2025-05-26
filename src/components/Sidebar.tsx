@@ -6,21 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Home, Calendar, Users, FileText, Settings, LogOut } from 'lucide-react';
 // import { format } from 'date-fns';
 // import { es } from 'date-fns/locale';
-
-// Interface for user data
-export interface UserInfo {
-    id: number;
-    name: string;
-    role: string;
-    email: string;
-    profileData?: {
-        photoUrl?: string | null;
-        specialty?: string;
-        name?: string;
-        lastName?: string;
-        fonoId?: number;
-    };
-}
+import { DatosFono } from '@/modules/fono/types/fono';
 
 // Function to determine navigation link classes
 const getNavLinkClass = (isActive: boolean) => {
@@ -31,7 +17,7 @@ const getNavLinkClass = (isActive: boolean) => {
 };
 
 export const Sidebar = () => {
-    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [userInfo, setUserInfo] = useState<DatosFono | null>(null);
     const pathname = usePathname();
     // const currentDate = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
 
@@ -64,11 +50,9 @@ export const Sidebar = () => {
             };
 
             window.addEventListener('storage', handleStorageChange);
-            const interval = setInterval(loadUserData, 2000);
 
             return () => {
                 window.removeEventListener('storage', handleStorageChange);
-                clearInterval(interval);
             };
         }
     }, []);
@@ -80,21 +64,17 @@ export const Sidebar = () => {
         }
     };
 
-    // Get user name and specialty
-    const userName = userInfo?.profileData?.name && userInfo?.profileData?.lastName
-        ? `${userInfo.profileData.name} ${userInfo.profileData.lastName}`
-        : userInfo?.name || 'Profesional';
 
-    const userSpecialty = userInfo?.profileData?.specialty || 'Fonoaudiólogo';
+    console.log(userInfo);
 
     return (
         <aside className="w-60 bg-sidebar border-r border-border p-4 flex flex-col">
             <div className="pb-4 mb-4 border-b border-border">
                 <div className="flex flex-col items-center">
                     <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-2 overflow-hidden">
-                        {userInfo?.profileData?.photoUrl ? (
+                        {userInfo?.FotoPerfil ? (
                             <img
-                                src={userInfo.profileData.photoUrl}
+                                src={userInfo.FotoPerfil}
                                 alt="Foto de perfil"
                                 className="h-full w-full object-cover"
                             />
@@ -102,8 +82,8 @@ export const Sidebar = () => {
                             <Users className="h-8 w-8 text-primary" />
                         )}
                     </div>
-                    <h2 className="font-medium text-gray-800">{userName}</h2>
-                    <span className="text-xs text-gray-500">{userSpecialty}</span>
+                    <h2 className="font-medium text-gray-800">{userInfo?.Nombre} {userInfo?.Apellido}</h2>
+                    <span className="text-xs text-gray-500">{userInfo?.Email}</span>
                 </div>
             </div>
 

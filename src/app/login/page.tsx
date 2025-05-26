@@ -33,6 +33,17 @@ export default function Login() {
             localStorage.setItem('userSession', JSON.stringify(userData));
             localStorage.setItem('token', response.token);
 
+            // Obtener datos completos del fono
+            const userId = userData.id;
+            const res = await fetch(`/api/auth/fono/datos?userId=${userId}`);
+            const datosFono = { ...userData, ...(await res.json()) };
+
+            // Guardar en localStorage
+
+
+
+            localStorage.setItem('userSession', JSON.stringify(datosFono));
+
             // Redirigir según el perfil
             switch (userData.perfil) {
                 case TipoUsuario.FONO:

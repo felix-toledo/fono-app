@@ -8,10 +8,12 @@ export default function FonoLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex h-screen bg-background">
+        <div className="flex min-h-screen bg-gray-50">
             <Sidebar />
-            <main className="flex-1 overflow-y-auto p-6">
-                {children}
+            <main className="flex-1 flex justify-center overflow-y-auto">
+                <div className="w-full max-w-6xl p-6">
+                    {children}
+                </div>
             </main>
         </div>
     );
