@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import {
     Search,
-    UserPlus,
+    User,
     Trash2,
     Calendar,
     FileText,
@@ -16,11 +17,13 @@ import {
     ChevronUp,
     MapPin,
     GraduationCap,
-    Briefcase
+    Briefcase,
+    Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { DeletePatientModal } from '@/modules/fono/components/modals/DeletePatientModal';
 
 type Paciente = {
     id: number;
@@ -48,6 +51,8 @@ export default function PacientesPage() {
     const [sortField, setSortField] = useState<keyof Paciente>('nombre');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [statusFilter, setStatusFilter] = useState<'todos' | 'activo' | 'inactivo' | 'pendiente'>('todos');
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
 
     useEffect(() => {
         fetchPacientes();
@@ -133,12 +138,43 @@ export default function PacientesPage() {
         );
     };
 
+    const handleDelete = async (pacienteId: number) => {
+        const paciente = pacientes.find(p => p.id === pacienteId);
+        if (!paciente) return;
+
+        setSelectedPaciente(paciente);
+        setDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!selectedPaciente) return;
+
+        try {
+            const response = await fetch(`/api/pacientes/${selectedPaciente.id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al eliminar el paciente');
+            }
+
+            // Refresh the patients list
+            fetchPacientes();
+            toast.success('Paciente eliminado exitosamente');
+        } catch (error: any) {
+            toast.error(error.message || 'Error al eliminar el paciente');
+        } finally {
+            setDeleteModalOpen(false);
+            setSelectedPaciente(null);
+        }
+    };
+
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Mis Pacientes</h1>
-                <Button onClick={() => router.push('/fono/pacientes/nuevo')}>
-                    <UserPlus className="h-4 w-4 mr-2" />
+                <Button className='text-white' onClick={() => router.push('/fono/pacientes/nuevo')}>
+                    <User className="h-4 w-4 mr-2" />
                     Nuevo Paciente
                 </Button>
             </div>
@@ -319,15 +355,22 @@ export default function PacientesPage() {
                                                     </Button>
                                                 </Link>
 
+                                                <Link href={`/fono/pacientes/${paciente.id}/editar`}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        title="Editar Paciente"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                </Link>
+
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
                                                     className="text-red-600 hover:text-red-900"
                                                     title="Eliminar Paciente"
-                                                    onClick={() => {
-                                                        // TODO: Implement delete functionality
-                                                        console.log('Delete patient:', paciente.id);
-                                                    }}
+                                                    onClick={() => handleDelete(paciente.id)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -340,6 +383,16 @@ export default function PacientesPage() {
                     </table>
                 </div>
             </Card>
+
+            <DeletePatientModal
+                isOpen={deleteModalOpen}
+                onClose={() => {
+                    setDeleteModalOpen(false);
+                    setSelectedPaciente(null);
+                }}
+                paciente={selectedPaciente as any}
+                onConfirm={handleConfirmDelete}
+            />
         </div>
     );
 }

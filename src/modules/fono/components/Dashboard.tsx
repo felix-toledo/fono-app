@@ -167,8 +167,6 @@ export default function Dashboard() {
                         title="Agregar Paciente"
                         description="Registra un nuevo paciente"
                         href="/fono/pacientes/nuevo"
-                        iconColor="text-secondary"
-                        iconBgColor="bg-secondary/10"
                     />
                 </div>
             </div>

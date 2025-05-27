@@ -77,7 +77,7 @@ export async function POST(request: Request) {
                             escolaridad,
                             ocupacion,
                             obraSocial,
-                            fechaAlta
+                            fechaAlta: new Date(fechaAlta)
                         }
                     });
 
@@ -126,7 +126,7 @@ export async function POST(request: Request) {
                     nombre: persona.nombre,
                     apellido: persona.apellido,
                     dni: persona.dni,
-                    fechaNac: persona.fechaNac,
+                    fechaNac: new Date(persona.fechaNac),
                     direccion: persona.direccion,
                     telefono: persona.telefono,
                     mail: persona.mail
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
                     escolaridad,
                     ocupacion,
                     obraSocial,
-                    fechaAlta
+                    fechaAlta: new Date(fechaAlta)
                 }
             });
 
@@ -196,6 +196,178 @@ export async function POST(request: Request) {
 
         return NextResponse.json(
             { message: error.message || 'Error al crear el paciente' },
+            { status: 500 }
+        );
+    }
+}
+
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+    try {
+        const pacienteId = parseInt(params.id);
+        if (isNaN(pacienteId)) {
+            return NextResponse.json(
+                { message: 'ID de paciente inválido' },
+                { status: 400 }
+            );
+        }
+
+        const data = await request.json();
+        const { persona, escolaridad, ocupacion, obraSocial, fechaAlta } = data;
+
+        // First, get the patient to find the associated person
+        const paciente = await prisma.paciente.findUnique({
+            where: { id: pacienteId },
+            include: { persona: true }
+        });
+
+        if (!paciente) {
+            return NextResponse.json(
+                { message: 'Paciente no encontrado' },
+                { status: 404 }
+            );
+        }
+
+        // Update everything in a transaction
+        const result = await prisma.$transaction(async (tx) => {
+            // 1. Update Persona
+            const updatedPersona = await tx.persona.update({
+                where: { id: paciente.personaId },
+                data: {
+                    nombre: persona.nombre,
+                    apellido: persona.apellido,
+                    dni: persona.dni,
+                    fechaNac: persona.fechaNac,
+                    direccion: persona.direccion,
+                    telefono: persona.telefono,
+                    mail: persona.mail
+                }
+            });
+
+            // 2. Update Paciente
+            const updatedPaciente = await tx.paciente.update({
+                where: { id: pacienteId },
+                data: {
+                    escolaridad,
+                    ocupacion,
+                    obraSocial,
+                    fechaAlta
+                }
+            });
+
+            return {
+                paciente: updatedPaciente,
+                persona: updatedPersona
+            };
+        });
+
+        const serializedResult = serializeBigInt(result);
+        return NextResponse.json({
+            message: 'Paciente actualizado exitosamente',
+            data: serializedResult
+        });
+
+    } catch (error: any) {
+        console.error('Error updating patient:', error);
+
+        // Handle specific Prisma errors
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2002') {
+                return NextResponse.json(
+                    { message: 'Ya existe una persona con este DNI' },
+                    { status: 400 }
+                );
+            }
+            if (error.code === 'P2025') {
+                return NextResponse.json(
+                    { message: 'Paciente no encontrado' },
+                    { status: 404 }
+                );
+            }
+        }
+
+        return NextResponse.json(
+            { message: error.message || 'Error al actualizar el paciente' },
+            { status: 500 }
+        );
+    }
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+    try {
+        const pacienteId = parseInt(params.id);
+        if (isNaN(pacienteId)) {
+            return NextResponse.json(
+                { message: 'ID de paciente inválido' },
+                { status: 400 }
+            );
+        }
+
+        // First, get the patient to find the associated person and user
+        const paciente = await prisma.paciente.findUnique({
+            where: { id: pacienteId },
+            include: {
+                persona: {
+                    include: {
+                        usuario: true
+                    }
+                },
+                fonoPacientes: true
+            }
+        });
+
+        if (!paciente) {
+            return NextResponse.json(
+                { message: 'Paciente no encontrado' },
+                { status: 404 }
+            );
+        }
+
+        // Delete everything in a transaction
+        await prisma.$transaction(async (tx) => {
+            // 1. Delete FonoPaciente relationships
+            if (paciente.fonoPacientes.length > 0) {
+                await tx.fonoPaciente.deleteMany({
+                    where: { pacienteId }
+                });
+            }
+
+            // 2. Delete Paciente
+            await tx.paciente.delete({
+                where: { id: pacienteId }
+            });
+
+            // 3. Delete Usuario if it exists
+            if (paciente.persona.usuario) {
+                await tx.usuario.delete({
+                    where: { id: paciente.persona.usuario.id }
+                });
+            }
+
+            // 4. Delete Persona
+            await tx.persona.delete({
+                where: { id: paciente.personaId }
+            });
+        });
+
+        return NextResponse.json({
+            message: 'Paciente eliminado exitosamente'
+        });
+
+    } catch (error: any) {
+        console.error('Error deleting patient:', error);
+
+        // Handle specific Prisma errors
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return NextResponse.json(
+                    { message: 'Paciente no encontrado' },
+                    { status: 404 }
+                );
+            }
+        }
+
+        return NextResponse.json(
+            { message: error.message || 'Error al eliminar el paciente' },
             { status: 500 }
         );
     }

@@ -11,7 +11,7 @@ interface QuickActionProps {
     iconBgColor?: string;
 }
 
-export function QuickAction({ icon: Icon, title, description, href, iconColor = 'text-primary', iconBgColor = 'bg-primary/10' }: QuickActionProps) {
+export function QuickAction({ icon: Icon, title, description, href, iconColor = 'text-primary', iconBgColor = 'white' }: QuickActionProps) {
     return (
         <Link href={href}>
             <Card className="flex items-center p-5 hover:bg-gray-50 transition-colors cursor-pointer h-full">

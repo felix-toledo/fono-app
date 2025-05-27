@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/Button';
+import { toast } from 'react-toastify';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { LogIn, User, Lock } from 'lucide-react';
@@ -133,13 +134,14 @@ export default function Login() {
                             </div>
 
                             <div className="text-sm">
-                                <button
+                                <Button
                                     type="button"
-                                    onClick={() => alert('Función no disponible en esta versión')}
+                                    variant="link"
+                                    onClick={() => toast.info('Función no disponible en esta versión')}
                                     className="text-primary hover:text-primary-hover"
                                 >
                                     ¿Olvidaste tu contraseña?
-                                </button>
+                                </Button>
                             </div>
                         </div>
 
@@ -158,7 +160,7 @@ export default function Login() {
                                         Iniciando sesión...
                                     </span>
                                 ) : (
-                                    <span className="flex items-center">
+                                    <span className="flex items-center text-white">
                                         <LogIn className="mr-2 h-5 w-5" />
                                         Iniciar sesión
                                     </span>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -137,10 +138,11 @@ export default function NuevoPaciente() {
 
             const result = await response.json();
             setCredentials(result.data.usuario);
+            toast.success('Paciente creado exitosamente');
 
         } catch (error: any) {
             console.error('Error al guardar paciente:', error);
-            alert(error instanceof Error ? error.message : 'Error al guardar el paciente. Por favor, intente nuevamente.');
+            toast.error(error instanceof Error ? error.message : 'Error al guardar el paciente. Por favor, intente nuevamente.');
         } finally {
             setIsLoading(false);
         }
@@ -149,7 +151,7 @@ export default function NuevoPaciente() {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex items-center mb-6">
-                <Button variant="ghost" onClick={() => router.push('/fono/pacientes')} className="mr-4">
+                <Button variant="ghost" onClick={() => router.push('/fono/pacientes')} className="mr-">
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Volver
                 </Button>
