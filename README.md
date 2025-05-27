@@ -34,6 +34,8 @@ npm install
 3. Configurar variables de entorno:
 Crear un archivo `.env` en la raíz del proyecto con el siguiente contenido:
 ```env
+JWT_SECRET=secret-key
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
 DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/fono_app"
 ```
 
