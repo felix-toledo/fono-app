@@ -1,20 +1,14 @@
 export interface DatosFono {
-    UserId: number | string;
-    FonoId: number | string;
-    PersonaId: number | string;
+    UserId: number;
+    FonoId: number;
+    PersonaId: number;
     Nombre: string;
     Apellido: string;
     DNI: string;
-    Direccion: string;
-    DireccionConsultorio: string;
-    Email: string;
-    FechaAltaFono: string; // ISO date string
-    FechaCreacionUsuario: string; // ISO date string
-    FechaNacimiento: string; // ISO date string
-    Matricula: string;
     Telefono: string;
-    Username: string;
-    UsuarioActivo: boolean;
+    Email: string;
+    DireccionConsultorio: string;
+    FechaAltaFono: Date;
     perfil: string;
     FotoPerfil: string;
 }

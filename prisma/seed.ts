@@ -5,20 +5,20 @@ const prisma = new PrismaClient()
 
 async function main() {
     // Create default fonoaudiologo user
-    const hashedPassword = await bcrypt.hash('fono123', 10)
+    const hashedPassword = await bcrypt.hash('Hola1234', 10)
 
     const persona = await prisma.persona.create({
         data: {
-            nombre: 'Fono',
-            apellido: 'Admin',
+            nombre: 'Felix',
+            apellido: 'Toledo',
             dni: 12345678,
             fechaNac: new Date('1990-01-01'),
             direccion: 'Calle Principal 123',
             telefono: 1234567890,
-            mail: 'fono@admin.com',
+            mail: 'felixtoledoctes@gmail.com',
             usuario: {
                 create: {
-                    username: 'fono',
+                    username: 'felix.toledo',
                     passwordHash: hashedPassword,
                     perfil: TipoUsuario.FONO,
                     activo: true

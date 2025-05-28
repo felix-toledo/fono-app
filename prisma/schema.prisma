@@ -323,9 +323,9 @@ model Turno {
   pacienteId    BigInt
   fonoId        BigInt
   fecha         DateTime
-  hora          DateTime
   estado        EstadosTurno
   observaciones String
+  tipoSesion    String?      // este es el nuevo campo
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 

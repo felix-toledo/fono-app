@@ -10,6 +10,7 @@ import { PatientList } from '@/components/PatientList';
 import { QuickAction } from '@/components/QuickAction';
 import { RecentPatientsTable } from '@/components/RecentPatientsTable';
 import { UserProfile } from '@/components/UserProfile';
+import { Loader } from '@/components/Loader';
 import {
     obtenerTurnos,
     obtenerPacientes,
@@ -25,6 +26,7 @@ const obtenerNombrePaciente = (pacientes: Paciente[], pacienteId: number): strin
 };
 
 export default function Dashboard() {
+    const [isLoading, setIsLoading] = useState(true);
     const [userInfo, setUserInfo] = useState<DatosFono | null>(null);
     const router = useRouter();
     const [stats, setStats] = useState({
@@ -76,6 +78,7 @@ export default function Dashboard() {
             if (isNaN(fonoId)) return;
 
             try {
+                setIsLoading(true);
                 const estadisticas = await obtenerEstadisticas(fonoId);
                 if (estadisticas) {
                     setStats({
@@ -120,6 +123,8 @@ export default function Dashboard() {
                 setPacientesRecientes(pacientesActivos);
             } catch (error) {
                 console.error('Error fetching data:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -127,6 +132,10 @@ export default function Dashboard() {
             fetchData();
         }
     }, [userInfo?.FonoId]);
+
+    if (isLoading) {
+        return <Loader />;
+    }
 
     const navegarADetallesPaciente = (id: number) => {
         router.push(`/fono/pacientes/detalles/${id}`);
@@ -160,7 +169,7 @@ export default function Dashboard() {
                         icon={Calendar}
                         title="Agregar Turno"
                         description="Programa una nueva cita"
-                        href="/fono/turnos/nuevo"
+                        href="/fono/turnos"
                     />
                     <QuickAction
                         icon={UserPlus}

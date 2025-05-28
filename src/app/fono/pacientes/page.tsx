@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { DeletePatientModal } from '@/modules/fono/components/modals/DeletePatientModal';
+import { Loader } from '@/components/Loader';
 
 type Paciente = {
     id: number;
@@ -202,196 +203,186 @@ export default function PacientesPage() {
                     </select>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                    onClick={() => handleSort('nombre')}
-                                >
-                                    <div className="flex items-center">
-                                        Nombre
-                                        {sortField === 'nombre' && (
-                                            sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />
-                                        )}
-                                    </div>
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    DNI
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Contacto
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Información
-                                </th>
-                                <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                    onClick={() => handleSort('estado')}
-                                >
-                                    <div className="flex items-center">
-                                        Estado
-                                        {sortField === 'estado' && (
-                                            sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />
-                                        )}
-                                    </div>
-                                </th>
-                                <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                    onClick={() => handleSort('ultimaConsulta')}
-                                >
-                                    <div className="flex items-center">
-                                        Última Consulta
-                                        {sortField === 'ultimaConsulta' && (
-                                            sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />
-                                        )}
-                                    </div>
-                                </th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Acciones
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {isLoading ? (
+                {isLoading ? (
+                    <Loader />
+                ) : error ? (
+                    <div className="text-red-500 text-center py-4">{error}</div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                                        Cargando pacientes...
-                                    </td>
+                                    <th
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                                        onClick={() => handleSort('nombre')}
+                                    >
+                                        <div className="flex items-center">
+                                            Nombre
+                                            {sortField === 'nombre' && (
+                                                sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />
+                                            )}
+                                        </div>
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        DNI
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Contacto
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Información
+                                    </th>
+                                    <th
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                                        onClick={() => handleSort('estado')}
+                                    >
+                                        <div className="flex items-center">
+                                            Estado
+                                            {sortField === 'estado' && (
+                                                sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />
+                                            )}
+                                        </div>
+                                    </th>
+                                    <th
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                                        onClick={() => handleSort('ultimaConsulta')}
+                                    >
+                                        <div className="flex items-center">
+                                            Última Consulta
+                                            {sortField === 'ultimaConsulta' && (
+                                                sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />
+                                            )}
+                                        </div>
+                                    </th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Acciones
+                                    </th>
                                 </tr>
-                            ) : error ? (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-4 text-center text-red-500">
-                                        {error}
-                                    </td>
-                                </tr>
-                            ) : filteredPacientes.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                                        No se encontraron pacientes
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredPacientes.map((paciente) => (
-                                    <tr key={paciente.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">
-                                                {paciente.nombre} {paciente.apellido}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {paciente.dni}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex flex-col space-y-1">
-                                                {paciente.telefono && (
-                                                    <div className="flex items-center text-sm text-gray-500">
-                                                        <Phone className="h-4 w-4 mr-1" />
-                                                        {paciente.telefono}
-                                                    </div>
-                                                )}
-                                                {paciente.mail && (
-                                                    <div className="flex items-center text-sm text-gray-500">
-                                                        <Mail className="h-4 w-4 mr-1" />
-                                                        {paciente.mail}
-                                                    </div>
-                                                )}
-                                                {paciente.direccion && (
-                                                    <div className="flex items-center text-sm text-gray-500">
-                                                        <MapPin className="h-4 w-4 mr-1" />
-                                                        {paciente.direccion}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex flex-col space-y-1">
-                                                {paciente.obraSocial && (
-                                                    <div className="text-sm text-gray-500">
-                                                        {paciente.obraSocial}
-                                                    </div>
-                                                )}
-                                                {paciente.escolaridad && (
-                                                    <div className="flex items-center text-sm text-gray-500">
-                                                        <GraduationCap className="h-4 w-4 mr-1" />
-                                                        {paciente.escolaridad}
-                                                    </div>
-                                                )}
-                                                {paciente.ocupacion && (
-                                                    <div className="flex items-center text-sm text-gray-500">
-                                                        <Briefcase className="h-4 w-4 mr-1" />
-                                                        {paciente.ocupacion}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            {getStatusBadge(paciente.estado)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {paciente.ultimaConsulta || '—'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div className="flex justify-end space-x-2">
-                                                <Link href={`/fono/pacientes/${paciente.id}/historia`}>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className={!paciente.tieneHistoriaClinica ? 'text-gray-400' : ''}
-                                                        title="Historia Clínica"
-                                                    >
-                                                        <FileText className="h-4 w-4" />
-                                                    </Button>
-                                                </Link>
-
-                                                <Link href={`/fono/pacientes/${paciente.id}/turnos`}>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        title="Turnos"
-                                                    >
-                                                        <Calendar className="h-4 w-4" />
-                                                    </Button>
-                                                </Link>
-
-                                                <Link href={`/fono/pacientes/${paciente.id}/editar`}>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        title="Editar Paciente"
-                                                    >
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Button>
-                                                </Link>
-
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="text-red-600 hover:text-red-900"
-                                                    title="Eliminar Paciente"
-                                                    onClick={() => handleDelete(paciente.id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {filteredPacientes.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                                            No se encontraron pacientes
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                ) : (
+                                    filteredPacientes.map((paciente) => (
+                                        <tr key={paciente.id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-gray-900">
+                                                    {paciente.nombre} {paciente.apellido}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {paciente.dni}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex flex-col space-y-1">
+                                                    {paciente.telefono && (
+                                                        <div className="flex items-center text-sm text-gray-500">
+                                                            <Phone className="h-4 w-4 mr-1" />
+                                                            {paciente.telefono}
+                                                        </div>
+                                                    )}
+                                                    {paciente.mail && (
+                                                        <div className="flex items-center text-sm text-gray-500">
+                                                            <Mail className="h-4 w-4 mr-1" />
+                                                            {paciente.mail}
+                                                        </div>
+                                                    )}
+                                                    {paciente.direccion && (
+                                                        <div className="flex items-center text-sm text-gray-500">
+                                                            <MapPin className="h-4 w-4 mr-1" />
+                                                            {paciente.direccion}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex flex-col space-y-1">
+                                                    {paciente.obraSocial && (
+                                                        <div className="text-sm text-gray-500">
+                                                            {paciente.obraSocial}
+                                                        </div>
+                                                    )}
+                                                    {paciente.escolaridad && (
+                                                        <div className="flex items-center text-sm text-gray-500">
+                                                            <GraduationCap className="h-4 w-4 mr-1" />
+                                                            {paciente.escolaridad}
+                                                        </div>
+                                                    )}
+                                                    {paciente.ocupacion && (
+                                                        <div className="flex items-center text-sm text-gray-500">
+                                                            <Briefcase className="h-4 w-4 mr-1" />
+                                                            {paciente.ocupacion}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {getStatusBadge(paciente.estado)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {paciente.ultimaConsulta || '—'}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div className="flex justify-end space-x-2">
+                                                    <Link href={`/fono/pacientes/${paciente.id}/historia`}>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            title="Historia Clínica"
+                                                        >
+                                                            <FileText className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+
+                                                    <Link href={`/fono/pacientes/${paciente.id}/turnos`}>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            title="Turnos"
+                                                        >
+                                                            <Calendar className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+
+                                                    <Link href={`/fono/pacientes/${paciente.id}/editar`}>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            title="Editar Paciente"
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-red-600 hover:text-red-900"
+                                                        title="Eliminar Paciente"
+                                                        onClick={() => handleDelete(paciente.id)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </Card>
 
             <DeletePatientModal
                 isOpen={deleteModalOpen}
-                onClose={() => {
-                    setDeleteModalOpen(false);
-                    setSelectedPaciente(null);
-                }}
-                paciente={selectedPaciente as any}
+                onClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleConfirmDelete}
+                paciente={selectedPaciente as any}
             />
         </div>
     );

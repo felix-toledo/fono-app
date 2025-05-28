@@ -4,6 +4,20 @@ import { format } from 'date-fns';
 
 const prisma = new PrismaClient();
 
+type PacienteRaw = {
+    paciente_id: bigint;
+    nombre: string;
+    apellido: string;
+    dni: string;
+    telefono: string;
+    mail: string;
+    obraSocial: string;
+    escolaridad: string;
+    ocupacion: string;
+    fechaAlta: Date;
+    fechaAsignacion: Date;
+};
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const fonoId = searchParams.get('fonoId');
@@ -13,48 +27,27 @@ export async function GET(request: Request) {
     }
 
     try {
-        const pacientes = await prisma.fonoPaciente.findMany({
-            where: {
-                fonoId: BigInt(fonoId)
-            },
-            include: {
-                paciente: {
-                    include: {
-                        persona: true,
-                        turnos: {
-                            orderBy: {
-                                fecha: 'desc'
-                            },
-                            take: 1
-                        },
-                        historiaClinica: {
-                            orderBy: {
-                                createdAt: 'desc'
-                            },
-                            take: 1
-                        }
-                    }
-                }
-            }
-        });
+        const pacientes = await prisma.$queryRaw<PacienteRaw[]>`
+            SELECT 
+                vp.*,
+                fp."fechaAsignacion" as "fechaAsignacion"
+            FROM vista_datos_paciente vp
+            JOIN "FonoPaciente" fp ON vp.paciente_id = fp."pacienteId"
+            WHERE fp."fonoId" = ${BigInt(fonoId)}
+        `;
 
-        return NextResponse.json(pacientes.map(fp => ({
-            id: Number(fp.paciente.id),
-            nombre: fp.paciente.persona.nombre,
-            apellido: fp.paciente.persona.apellido,
-            dni: fp.paciente.persona.dni.toString(),
-            telefono: fp.paciente.persona.telefono?.toString(),
-            mail: fp.paciente.persona.mail,
-            direccion: fp.paciente.persona.direccion,
-            obraSocial: fp.paciente.obraSocial,
-            escolaridad: fp.paciente.escolaridad,
-            ocupacion: fp.paciente.ocupacion,
-            fechaAlta: format(fp.paciente.fechaAlta, 'dd/MM/yyyy'),
-            ultimaConsulta: fp.paciente.turnos[0]
-                ? format(fp.paciente.turnos[0].fecha, 'dd/MM/yyyy')
-                : undefined,
-            tieneHistoriaClinica: fp.paciente.historiaClinica.length > 0,
-            estado: 'activo' // This could be calculated based on some business logic
+        return NextResponse.json(pacientes.map((p: any) => ({
+            id: Number(p.paciente_id),
+            nombre: p.nombre,
+            apellido: p.apellido,
+            dni: p.dni,
+            telefono: p.telefono,
+            mail: p.mail,
+            obraSocial: p.obraSocial,
+            escolaridad: p.escolaridad,
+            ocupacion: p.ocupacion,
+            fechaAlta: format(new Date(p.fechaAlta), 'dd/MM/yyyy'),
+            estado: 'activo'
         })));
     } catch (error) {
         console.error('Error fetching patients:', error);
