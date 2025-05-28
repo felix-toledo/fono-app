@@ -7,7 +7,7 @@ import { DatosFono } from '@/modules/fono/types/fono';
 interface FonoContextType {
     userInfo: DatosFono | null;
     isLoading: boolean;
-    getFonoId: () => number;
+    getFonoId: () => number | null;
 }
 
 const FonoContext = createContext<FonoContextType | undefined>(undefined);
