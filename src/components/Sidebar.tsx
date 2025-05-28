@@ -145,17 +145,17 @@ export const Sidebar = () => {
                         <Settings size={20} className="mr-2" />
                         <span>Configuración</span>
                     </Link>
+
+                    <button
+                        onClick={handleLogout}
+                        className="mt-4 text-gray-700 flex items-center p-3 rounded-lg hover:bg-red-50 hover:text-danger transition-colors"
+                    >
+                        <LogOut size={20} className="mr-2" />
+                        <span>Cerrar sesión</span>
+                    </button>
                 </div>
 
-                <button
-                    onClick={handleLogout}
-                    className="mt-auto pt-4 border-t border-border text-gray-700 flex items-center p-3 rounded-lg hover:bg-red-50 hover:text-danger transition-colors"
-                >
-                    <LogOut size={20} className="mr-2" />
-                    <span>Cerrar sesión</span>
-                </button>
-
-                <div className="mt-4 pt-4 border-t border-border text-sm">
+                <div className="mt-auto pt-4 border-t border-border text-sm">
                     <p className="text-gray-600">{currentDate}</p>
                     <p className="text-gray-400 text-xs mt-4">v 1.1<br />05042025</p>
                 </div>

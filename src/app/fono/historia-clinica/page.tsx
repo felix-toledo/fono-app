@@ -29,6 +29,7 @@ import { HistoriaClinicaView } from '@/components/historia-clinica/HistoriaClini
 import { EvolucionesList } from '@/components/historia-clinica/EvolucionesList';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Loader } from '@/components/Loader';
 
 const initialHistoriaClinica: HistoriaClinicaType = {
     pacienteId: 0,
@@ -81,10 +82,12 @@ export default function HistoriaClinica() {
     const [selectedEvolucion, setSelectedEvolucion] = useState<EvolucionFonoType | null>(null);
     const [pacientes, setPacientes] = useState<Paciente[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isLoadingPacientes, setIsLoadingPacientes] = useState(false);
+    const [isLoadingHistoria, setIsLoadingHistoria] = useState(false);
 
     useEffect(() => {
         const fonoId = getFonoId();
-        if (fonoId) {
+        if (fonoId !== null) {
             loadPacientes(fonoId);
         }
     }, [getFonoId]);
@@ -96,6 +99,7 @@ export default function HistoriaClinica() {
     }, [selectedPaciente]);
 
     const loadPacientes = async (fonoId: number) => {
+        setIsLoadingPacientes(true);
         try {
             const response = await fetch(`/api/fono/pacientes?fonoId=${fonoId}`);
             if (response.ok) {
@@ -107,11 +111,14 @@ export default function HistoriaClinica() {
         } catch (error) {
             console.error('Error loading patients:', error);
             toast.error('Error al cargar los pacientes');
+        } finally {
+            setIsLoadingPacientes(false);
         }
     };
 
     const loadHistoriaClinica = async () => {
         if (!selectedPaciente) return;
+        setIsLoadingHistoria(true);
 
         try {
             const response = await fetch(`/api/fono/pacientes/historia?pacienteId=${selectedPaciente.id}`);
@@ -129,6 +136,8 @@ export default function HistoriaClinica() {
         } catch (error) {
             console.error('Error loading clinical history:', error);
             toast.error('Error al cargar la historia clínica');
+        } finally {
+            setIsLoadingHistoria(false);
         }
     };
 
@@ -309,32 +318,36 @@ export default function HistoriaClinica() {
                                 className="pl-10"
                             />
                         </div>
-                        <div className="grid gap-4">
-                            {filteredPacientes.map(paciente => (
-                                <Card
-                                    key={paciente.id}
-                                    className="p-4 cursor-pointer hover:bg-gray-50"
-                                    onClick={() => setSelectedPaciente(paciente)}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h3 className="font-medium">
-                                                {paciente.nombre} {paciente.apellido}
-                                            </h3>
-                                            <p className="text-sm text-gray-500">DNI: {paciente.dni}</p>
+                        {isLoadingPacientes ? (
+                            <Loader />
+                        ) : (
+                            <div className="grid gap-4">
+                                {filteredPacientes.map(paciente => (
+                                    <Card
+                                        key={paciente.id}
+                                        className="p-4 cursor-pointer hover:bg-gray-50"
+                                        onClick={() => setSelectedPaciente(paciente)}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <h3 className="font-medium">
+                                                    {paciente.nombre} {paciente.apellido}
+                                                </h3>
+                                                <p className="text-sm text-gray-500">DNI: {paciente.dni}</p>
+                                            </div>
+                                            <Button variant="ghost" size="sm">
+                                                Seleccionar
+                                            </Button>
                                         </div>
-                                        <Button variant="ghost" size="sm">
-                                            Seleccionar
-                                        </Button>
-                                    </div>
-                                </Card>
-                            ))}
-                            {filteredPacientes.length === 0 && (
-                                <p className="text-center text-gray-500 py-4">
-                                    No se encontraron pacientes
-                                </p>
-                            )}
-                        </div>
+                                    </Card>
+                                ))}
+                                {filteredPacientes.length === 0 && (
+                                    <p className="text-center text-gray-500 py-4">
+                                        No se encontraron pacientes
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="space-y-6">
@@ -376,7 +389,9 @@ export default function HistoriaClinica() {
                             </div>
                         </div>
 
-                        {historiaData && (
+                        {isLoadingHistoria ? (
+                            <Loader />
+                        ) : historiaData && (
                             <>
                                 <HistoriaClinicaView
                                     historiaData={historiaData}

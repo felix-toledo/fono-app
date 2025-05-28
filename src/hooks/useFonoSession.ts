@@ -29,8 +29,12 @@ export function useFonoSession() {
     }, [router]);
 
     const getFonoId = () => {
+        if (isLoading) {
+            return null;
+        }
         if (!userInfo?.FonoId) {
-            throw new Error('No se pudo obtener el ID del fonoaudiólogo');
+            router.push('/login');
+            return null;
         }
         return Number(userInfo.FonoId);
     };

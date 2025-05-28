@@ -84,7 +84,7 @@ export default function Dashboard() {
                     setStats({
                         pacientesHoy: estadisticas.turnosHoy,
                         pacientesTotales: estadisticas.pacientesTotal ?? 0,
-                        pacientesRegulares: estadisticas.pacientesActivos,
+                        pacientesRegulares: estadisticas.pacientesRegulares,
                         consultasTotales: estadisticas.turnosTotal ?? 0
                     });
                 }
@@ -138,7 +138,7 @@ export default function Dashboard() {
     }
 
     const navegarADetallesPaciente = (id: number) => {
-        router.push(`/fono/pacientes/detalles/${id}`);
+        router.push(`/fono/pacientes/${id}/historia`);
     };
 
     return (

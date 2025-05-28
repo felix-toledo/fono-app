@@ -4,6 +4,10 @@ import { startOfDay, endOfDay } from 'date-fns';
 
 const prisma = new PrismaClient();
 
+interface RegularPatientsCount {
+    count: bigint;
+}
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const fonoId = Number(searchParams.get('fonoId'));
@@ -13,16 +17,18 @@ export async function GET(request: Request) {
     }
 
     const hoy = new Date();
+    const inicioDia = startOfDay(hoy);
+    const finDia = endOfDay(hoy);
 
     try {
-        // Turnos de hoy
         const turnosHoy = await prisma.turno.count({
             where: {
                 fonoId: fonoId,
                 fecha: {
-                    gte: startOfDay(hoy),
-                    lte: endOfDay(hoy)
-                }
+                    gte: inicioDia,
+                    lte: finDia
+                },
+                estado: 'CONFIRMADO'
             }
         });
 
@@ -33,33 +39,35 @@ export async function GET(request: Request) {
             }
         });
 
-        // Pacientes activos
-        const pacientesActivos = await prisma.fonoPaciente.count({
+        // Pacientes regulares (más de un turno REALIZADO)
+        const pacientesRegulares = await prisma.$queryRaw<RegularPatientsCount[]>`
+            SELECT COUNT(*) as count
+            FROM (
+                SELECT p.id
+                FROM "Paciente" p
+                JOIN "Turno" t ON t."pacienteId" = p.id
+                JOIN "FonoPaciente" fp ON fp."pacienteId" = p.id
+                WHERE fp."fonoId" = ${fonoId}
+                AND t.estado = 'REALIZADO'
+                GROUP BY p.id
+                HAVING COUNT(t.id) > 1
+            ) as regular_patients
+        `;
+
+        // Total de turnos REALIZADOS
+        const turnosTotal = await prisma.turno.count({
             where: {
                 fonoId: fonoId,
-                paciente: {
-                    turnos: {
-                        some: {
-                            fecha: {
-                                gte: new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000)
-                            }
-                        }
-                    }
-                }
+                estado: 'REALIZADO'
             }
         });
 
-        // Total de turnos
-        const turnosTotal = await prisma.turno.count({
-            where: {
-                fonoId: fonoId
-            }
-        });
-        console.log(turnosHoy, pacientesTotal, pacientesActivos, turnosTotal);
+        console.log(turnosHoy, pacientesTotal, Number(pacientesRegulares[0]?.count), turnosTotal);
+
         return NextResponse.json({
             turnosHoy,
             pacientesTotal,
-            pacientesActivos,
+            pacientesRegulares: Number(pacientesRegulares[0]?.count || 0),
             turnosTotal
         });
     } catch (error) {

@@ -13,7 +13,7 @@ import { useFono } from '@/contexts/FonoContext';
 import type { HistoriaClinica as HistoriaClinicaType } from '@/types/historia-clinica';
 import type { Paciente } from '@/types/paciente';
 import type { EvolucionFono as EvolucionFonoType } from '@/types/evolucion-fono';
-import { ChevronLeft, Plus, History, PenSquare } from 'lucide-react';
+import { ChevronLeft, Plus, History, PenSquare, X, Check } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { HistoriaClinicaView } from '@/components/historia-clinica/HistoriaClinicaView';
 import { EvolucionesList } from '@/components/historia-clinica/EvolucionesList';
@@ -89,6 +89,74 @@ export default function HistoriaPaciente() {
             }
         } catch (error) {
             console.error('Error loading evolutions:', error);
+        }
+    };
+
+    const handleChange = <T extends keyof HistoriaClinicaType>(
+        section: T,
+        field: keyof HistoriaClinicaType[T],
+        value: string | number
+    ) => {
+        if (!historiaData) return;
+
+        let processedValue = value;
+        if (typeof value === 'number' && isNaN(value)) {
+            processedValue = 1;
+        }
+
+        setHistoriaData(prev => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                [section]: {
+                    ...(prev[section] as any),
+                    [field]: processedValue
+                }
+            };
+        });
+    };
+
+    const handleGuardar = async () => {
+        if (!historiaData || !paciente) return;
+
+        const fonoId = getFonoId();
+        if (!fonoId) {
+            toast.error('Error: ID de fonoaudiólogo no encontrado');
+            return;
+        }
+
+        try {
+            const url = '/api/fono/pacientes/historia';
+            const method = historiaData.id ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...historiaData,
+                    pacienteId: paciente.id,
+                    fonoId: Number(fonoId)
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setHistoriaData(data);
+                setIsEditing(false);
+                toast.success('Historia clínica guardada exitosamente');
+
+                if (data.id) {
+                    loadEvoluciones(data.id);
+                }
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Error al guardar la historia clínica');
+            }
+        } catch (error) {
+            console.error('Error saving:', error);
+            toast.error(error instanceof Error ? error.message : 'Error al guardar la historia clínica');
         }
     };
 
@@ -180,9 +248,29 @@ export default function HistoriaPaciente() {
 
                     {historiaData && (
                         <>
+                            <div className="flex justify-end space-x-2 mb-4">
+                                {!isEditing ? (
+                                    <Button variant="outline" onClick={() => setIsEditing(true)}>
+                                        <PenSquare className="h-4 w-4 mr-2" />
+                                        Editar
+                                    </Button>
+                                ) : (
+                                    <>
+                                        <Button variant="outline" onClick={() => setIsEditing(false)}>
+                                            <X className="h-4 w-4 mr-2" />
+                                            Cancelar
+                                        </Button>
+                                        <Button onClick={handleGuardar}>
+                                            <Check className="h-4 w-4 mr-2" />
+                                            Guardar
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
                             <HistoriaClinicaView
                                 historiaData={historiaData}
-                                isEditing={false}
+                                isEditing={isEditing}
+                                onChange={handleChange}
                             />
 
                             <EvolucionesList
@@ -202,6 +290,56 @@ export default function HistoriaPaciente() {
                                 onSaveEvolucion={handleGuardarEvolucion}
                             />
                         </>
+                    )}
+                    {!historiaData && (
+                        <div className="flex justify-center py-8">
+                            <Button onClick={() => {
+                                setHistoriaData({
+                                    pacienteId: paciente.id,
+                                    motivo: {
+                                        id: 0,
+                                        razonConsulta: '',
+                                        derivacion: '',
+                                        observaciones: ''
+                                    },
+                                    antecedente: {
+                                        id: 0,
+                                        embarazoParto: '',
+                                        desarrolloPsicomotor: '',
+                                        enfermedadesPrevias: '',
+                                        medicacionActual: '',
+                                        historiaFamiliar: ''
+                                    },
+                                    evaluacion: {
+                                        id: 0,
+                                        lenguaje: '',
+                                        habla: '',
+                                        voz: '',
+                                        audicion: '',
+                                        deglucion: ''
+                                    },
+                                    diagnostico: {
+                                        id: 0,
+                                        tipoTrastorno: '',
+                                        severidad: '',
+                                        areasComprometidas: 'Pragmatica'
+                                    },
+                                    plan: {
+                                        id: 0,
+                                        objetivos: '',
+                                        frecuenciaSesiones: 1,
+                                        duracionTratamiento: 1,
+                                        tecnicas: '',
+                                        participacionFamiliar: '',
+                                        estado: 'Activa'
+                                    }
+                                });
+                                setIsEditing(true);
+                            }}>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Nueva Historia
+                            </Button>
+                        </div>
                     )}
                 </div>
             </Card>
