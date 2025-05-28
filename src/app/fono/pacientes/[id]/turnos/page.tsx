@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
     Table,
     TableBody,
@@ -61,7 +63,6 @@ export default function TurnosPaciente() {
     const handleStatusChange = async (turnoId: number, newStatus: 'REALIZADO' | 'CANCELADO') => {
         try {
             if (newStatus === 'REALIZADO') {
-                // Primero necesitamos obtener el ID de la historia clínica
                 const historiaResponse = await fetch(`/api/pacientes/${params.id}/historia`);
                 if (!historiaResponse.ok) {
                     const errorData = await historiaResponse.json();
@@ -92,21 +93,20 @@ export default function TurnosPaciente() {
                 throw new Error(errorData.error || 'Error al actualizar el estado del turno');
             }
 
-            // Actualizar el estado localmente
             setTurnos(turnos.map(turno =>
                 turno.id === turnoId
                     ? { ...turno, estado: newStatus }
                     : turno
             ));
+            toast.success(`Turno ${(newStatus as string) === 'REALIZADO' ? 'marcado como realizado' : 'cancelado'} exitosamente`);
         } catch (error) {
             console.error('Error updating appointment status:', error);
-            setError(error instanceof Error ? error.message : 'Error al actualizar el estado del turno');
+            toast.error(error instanceof Error ? error.message : 'Error al actualizar el estado del turno');
         }
     };
 
     const handleEvolucionSave = async (evolucionData: any) => {
         try {
-            // Primero guardamos la evolución
             const evolucionResponse = await fetch('/api/fono/pacientes/evolucion', {
                 method: 'POST',
                 headers: {
@@ -124,7 +124,6 @@ export default function TurnosPaciente() {
                 throw new Error(errorData.error || 'Error al guardar la evolución');
             }
 
-            // Luego actualizamos el estado del turno
             const turnoResponse = await fetch(`/api/turnos/${selectedTurno?.id}`, {
                 method: 'PUT',
                 headers: {
@@ -140,7 +139,6 @@ export default function TurnosPaciente() {
                 throw new Error(errorData.error || 'Error al actualizar el estado del turno');
             }
 
-            // Actualizar el estado localmente
             setTurnos(turnos.map(turno =>
                 turno.id === selectedTurno?.id
                     ? { ...turno, estado: 'REALIZADO' }
@@ -149,10 +147,10 @@ export default function TurnosPaciente() {
 
             setShowEvolucionModal(false);
             setSelectedTurno(null);
-            setError(null); // Limpiar cualquier error previo
+            toast.success('Evolución guardada y turno marcado como realizado');
         } catch (error) {
             console.error('Error saving evolution:', error);
-            setError(error instanceof Error ? error.message : 'Error al guardar la evolución');
+            toast.error(error instanceof Error ? error.message : 'Error al guardar la evolución');
         }
     };
 

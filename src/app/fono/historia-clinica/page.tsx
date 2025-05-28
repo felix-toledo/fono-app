@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 import { HistoriaClinicaView } from '@/components/historia-clinica/HistoriaClinicaView';
 import { EvolucionesList } from '@/components/historia-clinica/EvolucionesList';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const initialHistoriaClinica: HistoriaClinicaType = {
     pacienteId: 0,
@@ -99,9 +101,12 @@ export default function HistoriaClinica() {
             if (response.ok) {
                 const data = await response.json();
                 setPacientes(data);
+            } else {
+                toast.error('Error al cargar los pacientes');
             }
         } catch (error) {
             console.error('Error loading patients:', error);
+            toast.error('Error al cargar los pacientes');
         }
     };
 
@@ -118,9 +123,12 @@ export default function HistoriaClinica() {
                 } else {
                     setHistoriaData(null);
                 }
+            } else {
+                toast.error('Error al cargar la historia clínica');
             }
         } catch (error) {
             console.error('Error loading clinical history:', error);
+            toast.error('Error al cargar la historia clínica');
         }
     };
 
@@ -165,7 +173,7 @@ export default function HistoriaClinica() {
 
         const fonoId = getFonoId();
         if (!fonoId) {
-            console.error('Missing fonoId');
+            toast.error('Error: ID de fonoaudiólogo no encontrado');
             return;
         }
 
@@ -187,19 +195,20 @@ export default function HistoriaClinica() {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Historia clínica guardada:', data);
                 setHistoriaData(data);
                 setIsEditing(false);
+                toast.success('Historia clínica guardada exitosamente');
 
                 if (data.id) {
                     loadEvoluciones(data.id);
                 }
             } else {
                 const error = await response.json();
-                console.error('Error saving:', error);
+                throw new Error(error.error || 'Error al guardar la historia clínica');
             }
         } catch (error) {
             console.error('Error saving:', error);
+            toast.error(error instanceof Error ? error.message : 'Error al guardar la historia clínica');
         }
     };
 
@@ -215,23 +224,23 @@ export default function HistoriaClinica() {
 
     const handleGuardarEvolucion = async (evolucion: EvolucionFonoType) => {
         if (!historiaData) {
-            console.error('No hay historia clínica seleccionada');
+            toast.error('No hay historia clínica seleccionada');
             return;
         }
 
         if (!historiaData.id) {
-            console.error('La historia clínica debe ser guardada primero');
+            toast.error('La historia clínica debe ser guardada primero');
             return;
         }
 
         const fonoId = getFonoId();
         if (!fonoId) {
-            console.error('Missing fonoId');
+            toast.error('Error: ID de fonoaudiólogo no encontrado');
             return;
         }
 
         if (!evolucion.avances?.trim() || !evolucion.observaciones?.trim() || !evolucion.cambiosPlan?.trim()) {
-            console.error('Todos los campos son requeridos');
+            toast.error('Todos los campos son requeridos');
             return;
         }
 
@@ -246,8 +255,6 @@ export default function HistoriaClinica() {
             observaciones: evolucion.observaciones.trim(),
             cambiosPlan: evolucion.cambiosPlan.trim()
         };
-
-        console.log('Sending evolution data:', evolucionCompleta);
 
         try {
             const response = await fetch('/api/fono/pacientes/evolucion', {
@@ -267,8 +274,10 @@ export default function HistoriaClinica() {
             setEvoluciones(prev => [data, ...prev]);
             setIsAddingEvolucion(false);
             setSelectedEvolucion(null);
+            toast.success('Evolución guardada exitosamente');
         } catch (error) {
             console.error('Error saving evolution:', error);
+            toast.error(error instanceof Error ? error.message : 'Error al guardar la evolución');
         }
     };
 

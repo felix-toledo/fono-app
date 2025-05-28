@@ -17,6 +17,8 @@ import { ChevronLeft, Plus, History, PenSquare } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { HistoriaClinicaView } from '@/components/historia-clinica/HistoriaClinicaView';
 import { EvolucionesList } from '@/components/historia-clinica/EvolucionesList';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function HistoriaPaciente() {
     const params = useParams();
@@ -47,9 +49,12 @@ export default function HistoriaPaciente() {
             if (response.ok) {
                 const data = await response.json();
                 setPaciente(data);
+            } else {
+                toast.error('Error al cargar los datos del paciente');
             }
         } catch (error) {
             console.error('Error loading patient:', error);
+            toast.error('Error al cargar los datos del paciente');
         }
     };
 
@@ -66,9 +71,12 @@ export default function HistoriaPaciente() {
                 } else {
                     setHistoriaData(null);
                 }
+            } else {
+                toast.error('Error al cargar la historia clínica');
             }
         } catch (error) {
             console.error('Error loading clinical history:', error);
+            toast.error('Error al cargar la historia clínica');
         }
     };
 
@@ -86,23 +94,23 @@ export default function HistoriaPaciente() {
 
     const handleGuardarEvolucion = async (evolucion: EvolucionFonoType) => {
         if (!historiaData) {
-            console.error('No hay historia clínica seleccionada');
+            toast.error('No hay historia clínica seleccionada');
             return;
         }
 
         if (!historiaData.id) {
-            console.error('La historia clínica debe ser guardada primero');
+            toast.error('La historia clínica debe ser guardada primero');
             return;
         }
 
         const fonoId = getFonoId();
         if (!fonoId) {
-            console.error('Missing fonoId');
+            toast.error('Error: ID de fonoaudiólogo no encontrado');
             return;
         }
 
         if (!evolucion.avances?.trim() || !evolucion.observaciones?.trim() || !evolucion.cambiosPlan?.trim()) {
-            console.error('Todos los campos son requeridos');
+            toast.error('Todos los campos son requeridos');
             return;
         }
 
@@ -136,8 +144,10 @@ export default function HistoriaPaciente() {
             setEvoluciones(prev => [data, ...prev]);
             setIsAddingEvolucion(false);
             setSelectedEvolucion(null);
+            toast.success('Evolución guardada exitosamente');
         } catch (error) {
             console.error('Error saving evolution:', error);
+            toast.error(error instanceof Error ? error.message : 'Error al guardar la evolución');
         }
     };
 
