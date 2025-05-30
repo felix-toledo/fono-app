@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Calendar, Users, FileText, Settings, LogOut, Menu } from 'lucide-react';
+import { Home, Calendar, Users, FileText, Settings, LogOut, Menu, Gamepad2, User } from 'lucide-react';
 // import { format } from 'date-fns';
 // import { es } from 'date-fns/locale';
-import { DatosFono } from '@/modules/fono/types/fono';
+import { DatosFono } from '@/modules/fono/types/fonoLocalStorage';
+import { DatosPaciente } from '@/modules/paciente/types/pacienteLocalStorage';
 
 // Function to determine navigation link classes
 const getNavLinkClass = (isActive: boolean) => {
@@ -17,15 +18,12 @@ const getNavLinkClass = (isActive: boolean) => {
 };
 
 export const Sidebar = () => {
-    const [userInfo, setUserInfo] = useState<DatosFono | null>(null);
+    const [userInfo, setUserInfo] = useState<DatosFono | DatosPaciente | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
     // const currentDate = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
 
     const currentDate = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
-
-    // Check if we're exactly on the home page
-    const isHomePage = pathname === '/fono';
 
     // Function to load user data from localStorage
     const loadUserData = async () => {
@@ -65,6 +63,8 @@ export const Sidebar = () => {
         }
     };
 
+    const isFono = userInfo?.perfil === 'FONO';
+    const isPaciente = userInfo?.perfil === 'PACIENTE';
 
     console.log(userInfo);
 
@@ -112,39 +112,70 @@ export const Sidebar = () => {
                 </div>
 
                 <div className="flex flex-col flex-1">
-                    <Link
-                        href="/fono"
-                        className={getNavLinkClass(isHomePage)}
-                    >
-                        <Home size={20} className="mr-2" />
-                        <span>Inicio</span>
-                    </Link>
+                    {isFono ? (
+                        // Fonoaudiologo Navigation
+                        <>
+                            <Link
+                                href="/fono"
+                                className={getNavLinkClass(pathname === '/fono')}
+                            >
+                                <Home size={20} className="mr-2" />
+                                <span>Inicio</span>
+                            </Link>
 
-                    <Link href="/fono/pacientes" className={getNavLinkClass(pathname === '/fono/pacientes')}>
-                        <Users size={20} className="mr-2" />
-                        <span>Pacientes</span>
-                    </Link>
+                            <Link href="/fono/pacientes" className={getNavLinkClass(pathname === '/fono/pacientes')}>
+                                <Users size={20} className="mr-2" />
+                                <span>Pacientes</span>
+                            </Link>
 
-                    <Link href="/fono/turnos" className={getNavLinkClass(pathname === '/fono/turnos')}>
-                        <Calendar size={20} className="mr-2" />
-                        <span>Turnos</span>
-                    </Link>
+                            <Link href="/fono/turnos" className={getNavLinkClass(pathname === '/fono/turnos')}>
+                                <Calendar size={20} className="mr-2" />
+                                <span>Turnos</span>
+                            </Link>
 
-                    <Link href="/fono/historia-clinica" className={getNavLinkClass(pathname === '/fono/historia-clinica')}>
-                        <FileText size={20} className="mr-2" />
-                        <span>Historia Clínica</span>
-                    </Link>
+                            <Link href="/fono/historia-clinica" className={getNavLinkClass(pathname === '/fono/historia-clinica')}>
+                                <FileText size={20} className="mr-2" />
+                                <span>Historia Clínica</span>
+                            </Link>
 
-                    <div className="mt-4 mb-2 border-t border-gray-200 pt-4">
-                        <h3 className="text-xs font-medium text-gray-500 uppercase px-3 mb-2">
-                            Administración
-                        </h3>
-                    </div>
+                            <div className="mt-4 mb-2 border-t border-gray-200 pt-4">
+                                <h3 className="text-xs font-medium text-gray-500 uppercase px-3 mb-2">
+                                    Administración
+                                </h3>
+                            </div>
 
-                    <Link href="/fono/configuracion" className={getNavLinkClass(pathname === '/fono/configuracion')}>
-                        <Settings size={20} className="mr-2" />
-                        <span>Configuración</span>
-                    </Link>
+                            <Link href="/fono/configuracion" className={getNavLinkClass(pathname === '/fono/configuracion')}>
+                                <Settings size={20} className="mr-2" />
+                                <span>Configuración</span>
+                            </Link>
+                        </>
+                    ) : isPaciente ? (
+                        // Paciente Navigation
+                        <>
+                            <Link
+                                href="/paciente"
+                                className={getNavLinkClass(pathname === '/paciente')}
+                            >
+                                <Home size={20} className="mr-2" />
+                                <span>Inicio</span>
+                            </Link>
+
+                            <Link href="/paciente/turnos" className={getNavLinkClass(pathname === '/paciente/turnos')}>
+                                <Calendar size={20} className="mr-2" />
+                                <span>Mis Turnos</span>
+                            </Link>
+
+                            <Link href="/paciente/juegos" className={getNavLinkClass(pathname === '/paciente/juegos')}>
+                                <Gamepad2 size={20} className="mr-2" />
+                                <span>Juegos</span>
+                            </Link>
+
+                            <Link href="/paciente/sobre-mi" className={getNavLinkClass(pathname === '/paciente/sobre-mi')}>
+                                <User size={20} className="mr-2" />
+                                <span>Sobre Mí</span>
+                            </Link>
+                        </>
+                    ) : null}
 
                     <button
                         onClick={handleLogout}

@@ -34,24 +34,27 @@ export default function Login() {
             localStorage.setItem('userSession', JSON.stringify(userData));
             localStorage.setItem('token', response.token);
 
-            // Obtener datos completos del fono
-            const userId = userData.id;
-            const res = await fetch(`/api/auth/fono/datos?userId=${userId}`);
-            const datosFono = { ...userData, ...(await res.json()) };
 
-            // Guardar en localStorage
-
-
-
-            localStorage.setItem('userSession', JSON.stringify(datosFono));
 
             // Redirigir según el perfil
             switch (userData.perfil) {
                 case TipoUsuario.FONO:
+                    // Obtener datos completos del fono
+                    const userId = userData.id;
+                    const res = await fetch(`/api/auth/fono/datos?userId=${userId}`);
+                    const datosFono = { ...userData, ...(await res.json()) };
+                    // Guardar en localStorage
+                    localStorage.setItem('userSession', JSON.stringify(datosFono));
                     router.push('/fono');
                     break;
                 case TipoUsuario.PACIENTE:
-                    router.push('/paciente/dashboard');
+                    // Obtener datos completos del paciente
+                    const userIdPaciente = userData.id;
+                    const resPaciente = await fetch(`/api/auth/paciente/datos?userId=${userIdPaciente}`);
+                    const datosPaciente = { ...userData, ...(await resPaciente.json()) };
+                    // Guardar en localStorage
+                    localStorage.setItem('userSession', JSON.stringify(datosPaciente));
+                    router.push('/paciente/');
                     break;
                 case TipoUsuario.ADMIN:
                     router.push('/admin');

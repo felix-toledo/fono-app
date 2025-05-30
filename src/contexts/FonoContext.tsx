@@ -2,7 +2,7 @@
 
 import { createContext, useContext, ReactNode } from 'react';
 import { useFonoSession } from '@/hooks/useFonoSession';
-import { DatosFono } from '@/modules/fono/types/fono';
+import { DatosFono } from '@/modules/fono/types/fonoLocalStorage';
 
 interface FonoContextType {
     userInfo: DatosFono | null;

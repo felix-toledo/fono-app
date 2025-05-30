@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma';
-import { DatosFono } from '../types/fono';
+import { DatosFono } from '../types/fonoLocalStorage';
 
 export async function getDatosFonoPorUserId(userId: number) {
   try {

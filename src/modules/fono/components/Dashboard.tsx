@@ -17,7 +17,7 @@ import {
     obtenerEstadisticas,
 } from '@/modules/fono/services/dataService';
 import { Turno, Paciente } from '@/modules/fono/types';
-import { DatosFono } from '@/modules/fono/types/fono';
+import { DatosFono } from '@/modules/fono/types/fonoLocalStorage';
 
 // Función de utilidad para obtener el nombre completo del paciente
 const obtenerNombrePaciente = (pacientes: Paciente[], pacienteId: number): string => {

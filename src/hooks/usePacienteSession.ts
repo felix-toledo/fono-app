@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { DatosFono } from '@/modules/fono/types/fonoLocalStorage';
+import { DatosPaciente } from '@/modules/paciente/types/pacienteLocalStorage';
 import { useRouter } from 'next/navigation';
 
-export function useFonoSession() {
-    const [userInfo, setUserInfo] = useState<DatosFono | null>(null);
+export function usePacienteSession() {
+    const [userInfo, setUserInfo] = useState<DatosPaciente | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
@@ -13,7 +13,7 @@ export function useFonoSession() {
                 const sessionData = localStorage.getItem('userSession');
                 if (sessionData) {
                     const parsedData = JSON.parse(sessionData);
-                    if (parsedData.perfil === 'FONO') {
+                    if (parsedData.perfil === 'PACIENTE') {
                         setUserInfo(parsedData);
                     } else {
                         router.push('/login');
@@ -28,20 +28,20 @@ export function useFonoSession() {
         loadUserData();
     }, [router]);
 
-    const getFonoId = () => {
+    const getPacienteId = () => {
         if (isLoading) {
             return null;
         }
-        if (!userInfo?.FonoId) {
+        if (!userInfo?.PacienteId) {
             router.push('/login');
             return null;
         }
-        return Number(userInfo.FonoId);
+        return Number(userInfo.PacienteId);
     };
 
     return {
         userInfo,
         isLoading,
-        getFonoId
+        getPacienteId
     };
 }
