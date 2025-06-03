@@ -225,6 +225,7 @@ model EvolucionFono {
   historiaClinicaId BigInt
   fonoId            BigInt?
   fechaSesion       DateTime?
+  motivo            String?
   avances           String?
   observaciones     String?
   cambiosPlan       String?

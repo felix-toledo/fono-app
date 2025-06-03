@@ -46,14 +46,44 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const data = await request.json();
-        console.log('Received data:', data);
+        console.log('Received data:', JSON.stringify(data, null, 2));
 
-        const { historiaClinicaId, fonoId, fechaSesion, avances, observaciones, cambiosPlan } = data;
+        const { historiaClinicaId, fonoId, fechaSesion, motivo, avances, observaciones, cambiosPlan } = data;
 
         // Validar que todos los campos requeridos estén presentes
-        if (!historiaClinicaId || !fonoId || !fechaSesion || !avances || !observaciones || !cambiosPlan) {
-            console.log('Missing fields:', { historiaClinicaId, fonoId, fechaSesion, avances, observaciones, cambiosPlan });
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        const missingFields = [];
+        if (!historiaClinicaId) missingFields.push('historiaClinicaId');
+        if (!fonoId) missingFields.push('fonoId');
+        if (!fechaSesion) missingFields.push('fechaSesion');
+        if (!motivo) missingFields.push('motivo');
+        if (!avances) missingFields.push('avances');
+        if (!observaciones) missingFields.push('observaciones');
+        if (!cambiosPlan) missingFields.push('cambiosPlan');
+
+        if (missingFields.length > 0) {
+            console.log('Missing fields:', missingFields);
+            console.log('Received values:', {
+                historiaClinicaId,
+                fonoId,
+                fechaSesion,
+                motivo,
+                avances,
+                observaciones,
+                cambiosPlan
+            });
+            return NextResponse.json({
+                error: 'Missing required fields',
+                missingFields,
+                receivedValues: {
+                    historiaClinicaId,
+                    fonoId,
+                    fechaSesion,
+                    motivo,
+                    avances,
+                    observaciones,
+                    cambiosPlan
+                }
+            }, { status: 400 });
         }
 
         // Verificar que la historia clínica exista
@@ -93,10 +123,10 @@ export async function POST(request: Request) {
                 historiaClinicaId: BigInt(historiaClinicaId),
                 fonoId: BigInt(fonoId),
                 fechaSesion: new Date(fechaSesion),
+                motivo,
                 avances,
                 observaciones,
-                cambiosPlan,
-                motivo: 'Asistencia_de_Turno'
+                cambiosPlan
             }
         });
 
@@ -121,9 +151,9 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     try {
         const data = await request.json();
-        const { id, fonoId, fechaSesion, avances, observaciones, cambiosPlan } = data;
+        const { id, fonoId, fechaSesion, motivo, avances, observaciones, cambiosPlan } = data;
 
-        if (!id || !fonoId || !fechaSesion) {
+        if (!id || !fonoId || !fechaSesion || !motivo) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
@@ -149,6 +179,7 @@ export async function PUT(request: Request) {
             },
             data: {
                 fechaSesion: new Date(fechaSesion),
+                motivo: motivo || '',
                 avances: avances || '',
                 observaciones: observaciones || '',
                 cambiosPlan: cambiosPlan || ''

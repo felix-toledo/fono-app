@@ -225,7 +225,7 @@ export default function HistoriaPaciente() {
             return;
         }
 
-        if (!evolucion.avances?.trim() || !evolucion.observaciones?.trim() || !evolucion.cambiosPlan?.trim()) {
+        if (!evolucion.motivo?.trim() || !evolucion.avances?.trim() || !evolucion.observaciones?.trim() || !evolucion.cambiosPlan?.trim()) {
             toast.error('Todos los campos son requeridos');
             return;
         }
@@ -237,6 +237,7 @@ export default function HistoriaPaciente() {
             fechaSesion: evolucion.fechaSesion instanceof Date
                 ? evolucion.fechaSesion.toISOString()
                 : new Date(evolucion.fechaSesion).toISOString(),
+            motivo: evolucion.motivo.trim(),
             avances: evolucion.avances.trim(),
             observaciones: evolucion.observaciones.trim(),
             cambiosPlan: evolucion.cambiosPlan.trim()
