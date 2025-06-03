@@ -25,6 +25,10 @@ const nextConfig = {
     // Ensure proper routing
     experimental: {
         appDir: true
+    },
+    // Configure allowed image domains
+    images: {
+        domains: ['images.pexels.com', 'images.unsplash.com'],
     }
 };
 

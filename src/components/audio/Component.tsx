@@ -2,7 +2,12 @@
 
 import { useState, useRef } from 'react';
 
-export default function AudioRecorder() {
+interface AudioRecorderProps {
+    onTranscripcion?: (texto: string) => void;
+    modoPalabraUnica?: boolean;
+}
+
+export default function AudioRecorder({ onTranscripcion, modoPalabraUnica = false }: AudioRecorderProps) {
     const [isRecording, setIsRecording] = useState(false);
     const [transcribedText, setTranscribedText] = useState('');
     const [inputText, setInputText] = useState('');
@@ -120,10 +125,11 @@ export default function AudioRecorder() {
 
             const data = await res.json();
             setTranscribedText(data.text);
-            console.log('Transcribed text:', data.text);
+            if (onTranscripcion) onTranscripcion(data.text);
         } catch (error) {
             console.error('Error sending audio:', error);
             setTranscribedText('Error: Failed to transcribe audio. Please try again.');
+            if (onTranscripcion) onTranscripcion('');
         }
     }
 
@@ -142,58 +148,62 @@ export default function AudioRecorder() {
                     </button>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                    <textarea
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        placeholder="Escribe el texto que quieres que se lea..."
-                        className="w-full p-2 border rounded-lg min-h-[100px]"
-                    />
+                {!modoPalabraUnica && (
                     <div className="flex flex-col gap-2">
-                        <select
-                            value={selectedVoice}
-                            onChange={(e) => setSelectedVoice(e.target.value)}
-                            className="p-2 border rounded-lg"
-                        >
-                            {voices.map((voice) => (
-                                <option key={voice.id} value={voice.id}>
-                                    {voice.name}
-                                </option>
-                            ))}
-                        </select>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => speakText(inputText)}
-                                disabled={!inputText || isSpeaking}
-                                className={`px-4 py-2 rounded-full ${!inputText || isSpeaking
-                                    ? 'bg-gray-400'
-                                    : 'bg-green-500 hover:bg-green-600'
-                                    } text-white transition-colors`}
+                        <textarea
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            placeholder="Escribe el texto que quieres que se lea..."
+                            className="w-full p-2 border rounded-lg min-h-[100px]"
+                        />
+                        <div className="flex flex-col gap-2">
+                            <select
+                                value={selectedVoice}
+                                onChange={(e) => setSelectedVoice(e.target.value)}
+                                className="p-2 border rounded-lg"
                             >
-                                Leer Texto
-                            </button>
-                            {isSpeaking && (
+                                {voices.map((voice) => (
+                                    <option key={voice.id} value={voice.id}>
+                                        {voice.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="flex gap-2">
                                 <button
-                                    onClick={stopSpeaking}
-                                    className="px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors"
+                                    onClick={() => speakText(inputText)}
+                                    disabled={!inputText || isSpeaking}
+                                    className={`px-4 py-2 rounded-full ${!inputText || isSpeaking
+                                        ? 'bg-gray-400'
+                                        : 'bg-green-500 hover:bg-green-600'
+                                        } text-white transition-colors`}
                                 >
-                                    Detener
+                                    Leer Texto
                                 </button>
-                            )}
+                                {isSpeaking && (
+                                    <button
+                                        onClick={stopSpeaking}
+                                        className="px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors"
+                                    >
+                                        Detener
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {transcribedText && (
                     <div className="mt-4 p-4 bg-gray-100 rounded-lg">
                         <h3 className="font-semibold mb-2">Transcripción:</h3>
                         <p className="text-gray-700">{transcribedText}</p>
-                        <button
-                            onClick={() => speakText(transcribedText)}
-                            className="mt-2 px-4 py-2 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors"
-                        >
-                            Leer Transcripción
-                        </button>
+                        {!modoPalabraUnica && (
+                            <button
+                                onClick={() => speakText(transcribedText)}
+                                className="mt-2 px-4 py-2 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors"
+                            >
+                                Leer Transcripción
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

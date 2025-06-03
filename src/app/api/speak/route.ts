@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
         }
 
         const mp3 = await openai.audio.speech.create({
-            model: "tts-1",
-            voice: "alloy", // Puedes elegir entre: alloy, echo, fable, onyx, nova, shimmer
+            model: "gpt-4o-mini-tts",
+            voice: "echo", // Puedes elegir entre: alloy, echo, fable, onyx, nova, shimmer
             input: text,
         });
 

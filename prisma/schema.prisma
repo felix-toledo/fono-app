@@ -42,6 +42,15 @@ enum EstadosTurno {
   REALIZADO
 }
 
+enum TipoJuego {
+  ROLES
+  EMOCIONES
+  REPETIR
+  HABLAR
+  COMPLETAR
+  ORDEN
+}
+
 model Persona {
   id        BigInt   @id @default(autoincrement())
   nombre    String
@@ -66,6 +75,7 @@ model Paciente {
   ocupacion    String?
   obraSocial   String?
   fechaAlta    DateTime
+  experiencia  Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -231,6 +241,7 @@ model Juego {
   estado           Boolean
   fonoIdCreado     BigInt
   fechaCreado      DateTime
+  tipoJuego        TipoJuego?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -247,7 +258,7 @@ model CampoJuego {
   consigna        String
   rptaValida      String
   opciones        Json?
-  imagenConsigna  String?
+  imagenConsigna  Json?
   rama            TipoRama?
   audio           String?
   createdAt       DateTime   @default(now())
