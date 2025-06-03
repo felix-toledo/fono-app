@@ -248,6 +248,12 @@ export default function HistoriaPaciente() {
 
                     {historiaData && (
                         <>
+                            <HistoriaClinicaView
+                                historiaData={historiaData}
+                                isEditing={isEditing}
+                                onChange={handleChange}
+                            />
+
                             <div className="flex justify-end space-x-2 mb-4">
                                 {!isEditing ? (
                                     <Button variant="outline" onClick={() => setIsEditing(true)}>
@@ -267,11 +273,6 @@ export default function HistoriaPaciente() {
                                     </>
                                 )}
                             </div>
-                            <HistoriaClinicaView
-                                historiaData={historiaData}
-                                isEditing={isEditing}
-                                onChange={handleChange}
-                            />
 
                             <EvolucionesList
                                 evoluciones={evoluciones}
@@ -297,13 +298,11 @@ export default function HistoriaPaciente() {
                                 setHistoriaData({
                                     pacienteId: paciente.id,
                                     motivo: {
-                                        id: 0,
                                         razonConsulta: '',
                                         derivacion: '',
                                         observaciones: ''
                                     },
                                     antecedente: {
-                                        id: 0,
                                         embarazoParto: '',
                                         desarrolloPsicomotor: '',
                                         enfermedadesPrevias: '',
@@ -311,7 +310,6 @@ export default function HistoriaPaciente() {
                                         historiaFamiliar: ''
                                     },
                                     evaluacion: {
-                                        id: 0,
                                         lenguaje: '',
                                         habla: '',
                                         voz: '',
@@ -319,13 +317,11 @@ export default function HistoriaPaciente() {
                                         deglucion: ''
                                     },
                                     diagnostico: {
-                                        id: 0,
-                                        tipoTrastorno: '',
+                                        tipoTrastorno: 'Expresivos',
                                         severidad: '',
                                         areasComprometidas: 'Pragmatica'
                                     },
                                     plan: {
-                                        id: 0,
                                         objetivos: '',
                                         frecuenciaSesiones: 1,
                                         duracionTratamiento: 1,

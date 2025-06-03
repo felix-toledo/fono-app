@@ -8,6 +8,12 @@ interface DiagnosticoFonoProps {
 }
 
 export const DiagnosticoFono = ({ data, onChange, disabled }: DiagnosticoFonoProps) => {
+    const safeData = {
+        tipoTrastorno: data?.tipoTrastorno || 'Expresivos',
+        severidad: data?.severidad || '',
+        areasComprometidas: data?.areasComprometidas || 'Pragmatica'
+    };
+
     return (
         <div className="space-y-4">
             <h3 className="text-lg font-medium">Diagnóstico Fonoaudiológico</h3>
@@ -17,7 +23,7 @@ export const DiagnosticoFono = ({ data, onChange, disabled }: DiagnosticoFonoPro
                         Tipo de Trastorno
                     </label>
                     <select
-                        value={data.tipoTrastorno}
+                        value={safeData.tipoTrastorno}
                         onChange={(e) => onChange('tipoTrastorno', e.target.value as DiagnosticoFonoType['tipoTrastorno'])}
                         disabled={disabled}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -29,7 +35,7 @@ export const DiagnosticoFono = ({ data, onChange, disabled }: DiagnosticoFonoPro
                 </div>
                 <Input
                     label="Severidad"
-                    value={data.severidad}
+                    value={safeData.severidad}
                     onChange={(e) => onChange('severidad', e.target.value)}
                     disabled={disabled}
                 />
@@ -38,7 +44,7 @@ export const DiagnosticoFono = ({ data, onChange, disabled }: DiagnosticoFonoPro
                         Áreas Comprometidas
                     </label>
                     <select
-                        value={data.areasComprometidas}
+                        value={safeData.areasComprometidas}
                         onChange={(e) => onChange('areasComprometidas', e.target.value as DiagnosticoFonoType['areasComprometidas'])}
                         disabled={disabled}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"

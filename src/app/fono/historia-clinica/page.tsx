@@ -368,24 +368,6 @@ export default function HistoriaClinica() {
                                         Nueva Historia
                                     </Button>
                                 )}
-                                {historiaData && !isEditing && (
-                                    <Button variant="outline" onClick={() => setIsEditing(true)}>
-                                        <PenSquare className="h-4 w-4 mr-2" />
-                                        Editar
-                                    </Button>
-                                )}
-                                {isEditing && (
-                                    <>
-                                        <Button variant="outline" onClick={() => setIsEditing(false)}>
-                                            <X className="h-4 w-4 mr-2" />
-                                            Cancelar
-                                        </Button>
-                                        <Button onClick={handleGuardar}>
-                                            <Check className="h-4 w-4 mr-2" />
-                                            Guardar
-                                        </Button>
-                                    </>
-                                )}
                             </div>
                         </div>
 
@@ -398,6 +380,19 @@ export default function HistoriaClinica() {
                                     isEditing={isEditing}
                                     onChange={handleChange}
                                 />
+
+                                {isEditing && (
+                                    <div className="flex justify-end space-x-2 mt-6">
+                                        <Button variant="outline" onClick={() => setIsEditing(false)}>
+                                            <X className="h-4 w-4 mr-2" />
+                                            Cancelar
+                                        </Button>
+                                        <Button onClick={handleGuardar}>
+                                            <Check className="h-4 w-4 mr-2" />
+                                            Guardar
+                                        </Button>
+                                    </div>
+                                )}
 
                                 <EvolucionesList
                                     evoluciones={evoluciones}

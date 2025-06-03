@@ -95,7 +95,8 @@ export async function POST(request: Request) {
                 fechaSesion: new Date(fechaSesion),
                 avances,
                 observaciones,
-                cambiosPlan
+                cambiosPlan,
+                motivo: 'Asistencia_de_Turno'
             }
         });
 
