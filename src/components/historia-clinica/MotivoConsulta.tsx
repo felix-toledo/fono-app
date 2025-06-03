@@ -19,7 +19,7 @@ export const MotivoConsulta = ({ data, onChange, disabled }: MotivoConsultaProps
             <h3 className="text-lg font-medium">Motivo de Consulta</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                    label="Razón de Consulta"
+                    label="Motivo de Consulta"
                     value={safeData.razonConsulta}
                     onChange={(e) => onChange('razonConsulta', e.target.value)}
                     disabled={disabled}
