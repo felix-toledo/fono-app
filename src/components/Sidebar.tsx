@@ -138,6 +138,11 @@ export const Sidebar = () => {
                                 <span>Historia Clínica</span>
                             </Link>
 
+                            <Link href="/fono/juegos" className={getNavLinkClass(pathname === '/fono/juegos')}>
+                                <Gamepad2 size={20} className="mr-2" />
+                                <span>Juegos</span>
+                            </Link>
+
                             <div className="mt-4 mb-2 border-t border-gray-200 pt-4">
                                 <h3 className="text-xs font-medium text-gray-500 uppercase px-3 mb-2">
                                     Administración

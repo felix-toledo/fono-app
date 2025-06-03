@@ -91,7 +91,7 @@ export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSin
             </div>
             <div className="text-lg text-center font-semibold">{textoCompleto}</div>
             <div className="flex flex-col items-center gap-2">
-                <div className="text-xl font-bold">Escucha y completa:</div>
+                <div className="text-xl font-bold">Escucha y cumplí la consigna:</div>
                 <button
                     onClick={reproducirTexto}
                     disabled={isLoading}

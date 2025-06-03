@@ -12,7 +12,7 @@ interface Respuesta {
 
 interface GameQuestionProps {
     tipo_juego: string;
-    url_imagen: string;
+    url_imagen?: string;
     consigna: string;
     respuestas: Respuesta[];
     onRespuestaSeleccionada: (esCorrecta: boolean) => void;
@@ -177,6 +177,8 @@ const GameQuestion = ({
         }
     };
 
+    console.log(url_imagen);
+
     return (
         <>
             <motion.div
@@ -185,21 +187,23 @@ const GameQuestion = ({
                 className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg"
             >
                 {/* Imagen principal con animación */}
-                <motion.div
-                    className="relative w-full h-64 mb-6 rounded-lg overflow-hidden"
-                    whileHover={{
-                        scale: 1.1,
-                        rotate: 2
-                    }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                >
-                    <Image
-                        src={url_imagen}
-                        alt="Pregunta"
-                        fill
-                        className="object-contain"
-                    />
-                </motion.div>
+                {url_imagen && url_imagen !== '' && url_imagen !== '/placeholder.jpg' && (
+                    <motion.div
+                        className="relative w-full h-64 mb-6 rounded-lg overflow-hidden"
+                        whileHover={{
+                            scale: 1.1,
+                            rotate: 2
+                        }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                    >
+                        <Image
+                            src={url_imagen}
+                            alt=""
+                            fill
+                            className="object-contain"
+                        />
+                    </motion.div>
+                )}
 
                 {/* Consigna con animación */}
                 <motion.h2
