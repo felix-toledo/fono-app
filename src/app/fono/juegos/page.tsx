@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, BarChart3 } from "lucide-react";
+import { PlusCircle, BarChart3, Eye } from "lucide-react";
 import Link from "next/link";
 
 export default function JuegosDashboard() {
@@ -15,6 +15,12 @@ export default function JuegosDashboard() {
                         <Link href="/fono/juegos/crear">
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Crear Juego
+                        </Link>
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <Link href="/fono/juegos/ver">
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver Juegos
                         </Link>
                     </Button>
                     <Button variant="outline" asChild>

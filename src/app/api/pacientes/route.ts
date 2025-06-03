@@ -52,7 +52,7 @@ export async function POST(request: Request) {
                 const passwordHash = await bcrypt.hash(randomPassword, 10);
 
                 // Create username from DNI
-                const username = `paciente_${persona.dni}`;
+                const username = `${persona.dni}`;
 
                 // Create everything in a transaction
                 const result = await prisma.$transaction(async (tx) => {
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
         // If no existing person, proceed with normal creation
         const randomPassword = randomBytes(8).toString('hex');
         const passwordHash = await bcrypt.hash(randomPassword, 10);
-        const username = `paciente_${persona.dni}`;
+        const username = `${persona.dni}`;
 
         const result = await prisma.$transaction(async (tx) => {
             // 1. Create Persona

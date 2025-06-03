@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/Card';
 import { Input } from '@/components/Input';
-import { Calendar as CalendarIcon, Clock, CalendarCheck, CheckSquare, ChevronLeft, ChevronRight, Plus, UserPlus, Users, Info, X, Edit2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, CalendarCheck, CheckSquare, ChevronLeft, ChevronRight, Plus, UserPlus, Users, Info, X, Edit2, Trash } from 'lucide-react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format } from 'date-fns';
@@ -46,14 +46,19 @@ const Turnos = () => {
 
     // Horarios predefinidos
     const [timeSlots] = useState<TimeSlot[]>([
-        { id: '1', time: '09:00', label: 'Mañana', status: 'available' },
-        { id: '2', time: '10:00', label: 'Mañana', status: 'available' },
-        { id: '3', time: '11:00', label: 'Mañana', status: 'available' },
-        { id: '4', time: '12:00', label: 'Mañana', status: 'available' },
-        { id: '5', time: '14:00', label: 'Tarde', status: 'available' },
-        { id: '6', time: '15:00', label: 'Tarde', status: 'available' },
-        { id: '7', time: '16:00', label: 'Tarde', status: 'available' },
+        { id: '1', time: '08:00', label: 'Mañana', status: 'available' },
+        { id: '2', time: '8:45', label: 'Mañana', status: 'available' },
+        { id: '3', time: '9:30', label: 'Mañana', status: 'available' },
+        { id: '4', time: '10:15', label: 'Mañana', status: 'available' },
+        { id: '5', time: '11:00', label: 'Mañana', status: 'available' },
+        { id: '6', time: '11:45', label: 'Mañana', status: 'available' },
+        { id: '7', time: '12:30', label: 'Mañana', status: 'available' },
         { id: '8', time: '17:00', label: 'Tarde', status: 'available' },
+        { id: '9', time: '17:45', label: 'Tarde', status: 'available' },
+        { id: '10', time: '18:30', label: 'Tarde', status: 'available' },
+        { id: '11', time: '19:15', label: 'Tarde', status: 'available' },
+        { id: '12', time: '20:00', label: 'Tarde', status: 'available' },
+        { id: '13', time: '20:45', label: 'Tarde', status: 'available' },
     ]);
 
     // Agrupar por mañana y tarde
@@ -203,12 +208,24 @@ const Turnos = () => {
             return;
         }
 
+        // Agregar validación de horario para el día actual
+        const horarioSeleccionado = timeSlots.find(slot => slot.id === selectedSlot)?.time;
+        const hoy = new Date();
+        const fechaSeleccionada = new Date(selectedDate);
+        const esMismoDia = fechaSeleccionada.getDate() === hoy.getDate() &&
+            fechaSeleccionada.getMonth() === hoy.getMonth() &&
+            fechaSeleccionada.getFullYear() === hoy.getFullYear();
+
+        if (esMismoDia && horarioSeleccionado && esHorarioAnterior(horarioSeleccionado)) {
+            toast.error('No se pueden crear turnos en horarios pasados para el día actual');
+            return;
+        }
+
         try {
             setIsLoading(true);
             setError(null);
             const fonoId = getFonoId();
             const fechaFormateada = format(selectedDate, 'dd/MM/yyyy');
-            const horarioSeleccionado = timeSlots.find(slot => slot.id === selectedSlot)?.time;
 
             const turnoData = {
                 pacienteId: nuevoPaciente,
@@ -367,10 +384,11 @@ const Turnos = () => {
                 {turnosDelDia.map(turno => (
                     <div key={turno.id} className="bg-gray-50 rounded-lg p-3">
                         <div className="flex items-center justify-between">
-                            <span className="font-medium">{formatearHora(turno.horario)}</span>
+                            <span className="font-sm">{formatearHora(turno.horario)}</span>
                             <span className="text-sm text-gray-600">{turno.pacienteNombre}</span>
                         </div>
-                        <div className="mt-2">
+                        <div className="mt-2 flex items-center justify-between">
+                            <span className="text-sm text-gray-600">{turno.fecha}</span>
                             <span className={`inline-block px-2 py-1 rounded-full text-xs ${turno.estado === 'CONFIRMADO' ? 'bg-green-100 text-green-800' :
                                 turno.estado === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-800' :
                                     turno.estado === 'CANCELADO' ? 'bg-red-100 text-red-800' :
@@ -379,22 +397,24 @@ const Turnos = () => {
                                 {turno.estado}
                             </span>
                         </div>
-                        <div className="flex justify-end space-x-2 mt-2">
+                        <div className="flex flex-wrap gap-2 mt-2 justify-end">
                             {turno.estado === 'CONFIRMADO' && (
                                 <>
                                     <Button
                                         size="sm"
                                         variant="outline"
                                         onClick={() => handleStatusChange(turno, 'REALIZADO')}
+                                        className="flex-shrink-0 bg-green-300"
                                     >
-                                        Realizado
+                                        <CheckSquare className="w-4 h-4" />
                                     </Button>
                                     <Button
                                         size="sm"
                                         variant="destructive"
                                         onClick={() => handleStatusChange(turno, 'CANCELADO')}
+                                        className="flex-shrink-0 bg-yellow-200"
                                     >
-                                        Cancelar
+                                        <X className="w-4 h-4 text-black" />
                                     </Button>
                                 </>
                             )}
@@ -402,22 +422,31 @@ const Turnos = () => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleEdit(turno)}
+                                className="flex-shrink-0"
                             >
-                                Editar
+                                <Edit2 className="w-4 h-4" />
                             </Button>
                             <Button
-                                className='text-white'
+                                className='text-white flex-shrink-0'
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => handleDelete(turno)}
                             >
-                                Eliminar
+                                <Trash className="w-4 h-4" />
                             </Button>
                         </div>
                     </div>
                 ))}
             </div>
         );
+    };
+
+    const esHorarioAnterior = (horario: string) => {
+        const ahora = new Date();
+        const [horas, minutos] = horario.split(':').map(Number);
+        const horarioComparar = new Date();
+        horarioComparar.setHours(horas, minutos, 0, 0);
+        return horarioComparar < ahora;
     };
 
     return (

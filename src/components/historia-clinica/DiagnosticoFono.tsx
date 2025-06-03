@@ -12,12 +12,21 @@ export const DiagnosticoFono = ({ data, onChange, disabled }: DiagnosticoFonoPro
         <div className="space-y-4">
             <h3 className="text-lg font-medium">Diagnóstico Fonoaudiológico</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                    label="Tipo de Trastorno"
-                    value={data.tipoTrastorno}
-                    onChange={(e) => onChange('tipoTrastorno', e.target.value)}
-                    disabled={disabled}
-                />
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tipo de Trastorno
+                    </label>
+                    <select
+                        value={data.tipoTrastorno}
+                        onChange={(e) => onChange('tipoTrastorno', e.target.value as DiagnosticoFonoType['tipoTrastorno'])}
+                        disabled={disabled}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                        <option value="Expresivos">Expresivos</option>
+                        <option value="Mixtos">Mixtos</option>
+                        <option value="Procesamiento_y_Formulacion">Procesamiento y Formulación</option>
+                    </select>
+                </div>
                 <Input
                     label="Severidad"
                     value={data.severidad}

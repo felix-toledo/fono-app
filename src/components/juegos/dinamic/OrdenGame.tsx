@@ -138,36 +138,57 @@ const OrdenGame = ({ imagenes, palabras, consigna, onOrdenCompletado }: OrdenGam
                 animate={{ opacity: 1, y: 0 }}
                 className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg"
             >
-                <motion.h2 className="text-2xl font-bold text-center mb-8 text-gray-800">
+                <motion.h2
+                    className="text-2xl font-bold text-center mb-8 text-gray-800 bg-[#fec0bb]/10 p-4 rounded-lg"
+                    animate={{
+                        y: [0, -5, 0]
+                    }}
+                    transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                >
                     {consigna}
                 </motion.h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Imágenes */}
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         {imagenes.map((img, index) => (
                             <motion.div
                                 key={index}
-                                className="relative w-full h-48 rounded-lg overflow-hidden"
-                                whileHover={{ scale: 1.05 }}
+                                className="relative w-full h-48 rounded-lg overflow-hidden bg-[#99d4f2]/10"
+                                whileHover={{ scale: 1.05, rotate: 2 }}
+                                transition={{ type: "spring", stiffness: 300 }}
                             >
                                 <Image
                                     src={img}
                                     alt={`Imagen ${index + 1}`}
                                     fill
-                                    className="object-contain"
+                                    className="object-contain p-4"
                                 />
                             </motion.div>
                         ))}
                     </div>
 
                     {/* Palabras seleccionables */}
-                    <div className="space-y-4">
-                        <div className="text-center mb-4">
-                            <span className="text-lg font-medium">
+                    <div className="space-y-6">
+                        <motion.div
+                            className="text-center mb-6 bg-[#fec0bb]/10 p-4 rounded-lg"
+                            animate={{
+                                scale: [1, 1.02, 1]
+                            }}
+                            transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                        >
+                            <span className="text-xl font-medium text-gray-700">
                                 Selecciona la palabra {seleccionActual} de {palabras.length}
                             </span>
-                        </div>
+                        </motion.div>
                         <div className="grid gap-4">
                             {ordenadoPalabras.map((palabra) => {
                                 const yaSeleccionada = ordenSeleccionado.some(p => p.palabra === palabra.palabra);
@@ -176,15 +197,17 @@ const OrdenGame = ({ imagenes, palabras, consigna, onOrdenCompletado }: OrdenGam
                                         key={palabra.palabra}
                                         onClick={() => handlePalabraClick(palabra)}
                                         disabled={yaSeleccionada}
-                                        className={`p-4 rounded-xl border-2 transition-all
+                                        className={`
+                                            p-4 rounded-xl border-2 transition-all
                                             ${yaSeleccionada
-                                                ? 'bg-gray-100 border-gray-300 text-gray-400'
+                                                ? 'bg-[#99d4f2]/20 border-[#99d4f2] text-[#99d4f2]'
                                                 : 'bg-white border-[#fec0bb] hover:border-[#99d4f2] hover:shadow-lg'
-                                            }`}
-                                        whileHover={{ scale: yaSeleccionada ? 1 : 1.05 }}
+                                            }
+                                        `}
+                                        whileHover={{ scale: yaSeleccionada ? 1 : 1.05, rotate: yaSeleccionada ? 0 : 2 }}
                                         whileTap={{ scale: yaSeleccionada ? 1 : 0.95 }}
                                     >
-                                        <span className="text-lg font-medium">
+                                        <span className="text-lg font-medium block text-center">
                                             {palabra.palabra}
                                         </span>
                                     </motion.button>

@@ -73,4 +73,45 @@ export async function POST(request: Request) {
             { status: 500 }
         );
     }
+}
+
+export async function GET() {
+    try {
+        const juegos = await prisma.juego.findMany({
+            include: {
+                juegoCampoJs: {
+                    include: {
+                        campoJuego: true
+                    }
+                }
+            },
+            orderBy: {
+                fechaCreado: 'desc'
+            }
+        });
+
+        // Custom replacer function to handle BigInt
+        const replacer = (key: string, value: any) => {
+            if (typeof value === 'bigint') {
+                return value.toString();
+            }
+            if (value instanceof Date) {
+                return value.toISOString();
+            }
+            return value;
+        };
+
+        const juegosSerializados = JSON.parse(JSON.stringify(juegos, replacer));
+
+        return NextResponse.json({
+            success: true,
+            juegos: juegosSerializados
+        });
+    } catch (error) {
+        console.error('Error fetching games:', error);
+        return NextResponse.json(
+            { error: 'Error al obtener los juegos' },
+            { status: 500 }
+        );
+    }
 } 

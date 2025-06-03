@@ -14,6 +14,12 @@ enum TipoRama {
   Morfosintaxis
 }
 
+enum TipoTrastorno {
+  Expresivos
+  Mixtos
+  Procesamiento_y_Formulacion
+}
+
 enum TipoCampo {
   elegir_respuesta
   asociar_imagen
@@ -155,7 +161,7 @@ model EvaluacionFono {
 
 model DiagnosticoFono {
   id                BigInt    @id @default(autoincrement())
-  tipoTrastorno     String?
+  tipoTrastorno     TipoTrastorno
   severidad         String?
   areasComprometidas TipoRama?
   createdAt         DateTime  @default(now())

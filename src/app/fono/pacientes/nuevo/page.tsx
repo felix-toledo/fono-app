@@ -51,22 +51,45 @@ export default function NuevoPaciente() {
     const [isLoading, setIsLoading] = useState(false);
     const [credentials, setCredentials] = useState<Credentials>(null);
 
+    // Validation functions
+    const validateDNI = (dni: string): boolean => {
+        const dniNumber = dni.replace(/\D/g, '');
+        return dniNumber.length >= 7 && dniNumber.length <= 8;
+    };
+
+    const validatePhone = (phone: string): boolean => {
+        const phoneNumber = phone.replace(/\D/g, '');
+        return phoneNumber.length <= 12;
+    };
+
+    const validateBirthDate = (date: string): boolean => {
+        const birthDate = new Date(date);
+        const today = new Date();
+        return birthDate <= today;
+    };
+
+    const sanitizeInput = (input: string): string => {
+        return input.replace(/[<>]/g, '');
+    };
+
     // Handle input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+        const sanitizedValue = sanitizeInput(value);
+
         if (name.startsWith('persona.')) {
             const field = name.split('.')[1];
             setFormData(prevData => ({
                 ...prevData,
                 persona: {
                     ...prevData.persona,
-                    [field]: value
+                    [field]: sanitizedValue
                 }
             }));
         } else {
             setFormData(prevData => ({
                 ...prevData,
-                [name]: value
+                [name]: sanitizedValue
             }));
         }
     };
@@ -81,6 +104,21 @@ export default function NuevoPaciente() {
             // Validate required fields
             if (!formData.persona.nombre.trim() || !formData.persona.apellido.trim() || !formData.persona.dni.trim()) {
                 throw new Error('Por favor complete todos los campos requeridos');
+            }
+
+            // Validate DNI
+            if (!validateDNI(formData.persona.dni)) {
+                throw new Error('El DNI debe tener entre 7 y 8 dígitos');
+            }
+
+            // Validate phone number if provided
+            if (formData.persona.telefono && !validatePhone(formData.persona.telefono)) {
+                throw new Error('El teléfono no puede tener más de 12 dígitos');
+            }
+
+            // Validate birth date
+            if (!validateBirthDate(formData.persona.fechaNac)) {
+                throw new Error('La fecha de nacimiento no puede ser futura');
             }
 
             // Convert dni and telefono to numbers
@@ -189,6 +227,7 @@ export default function NuevoPaciente() {
                                     value={formData.persona.nombre}
                                     onChange={handleInputChange}
                                     required
+                                    maxLength={50}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -199,6 +238,7 @@ export default function NuevoPaciente() {
                                     value={formData.persona.apellido}
                                     onChange={handleInputChange}
                                     required
+                                    maxLength={50}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -229,6 +269,7 @@ export default function NuevoPaciente() {
                                     name="persona.direccion"
                                     value={formData.persona.direccion}
                                     onChange={handleInputChange}
+                                    maxLength={50}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -248,6 +289,7 @@ export default function NuevoPaciente() {
                                     type="email"
                                     value={formData.persona.mail}
                                     onChange={handleInputChange}
+                                    maxLength={50}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -257,6 +299,7 @@ export default function NuevoPaciente() {
                                     name="obraSocial"
                                     value={formData.obraSocial}
                                     onChange={handleInputChange}
+                                    maxLength={50}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -266,6 +309,7 @@ export default function NuevoPaciente() {
                                     name="escolaridad"
                                     value={formData.escolaridad}
                                     onChange={handleInputChange}
+                                    maxLength={50}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -275,6 +319,7 @@ export default function NuevoPaciente() {
                                     name="ocupacion"
                                     value={formData.ocupacion}
                                     onChange={handleInputChange}
+                                    maxLength={50}
                                 />
                             </div>
                         </div>

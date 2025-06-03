@@ -189,9 +189,9 @@ const GameQuestion = ({
                 {/* Imagen principal con animación */}
                 {url_imagen && url_imagen !== '' && url_imagen !== '/placeholder.jpg' && (
                     <motion.div
-                        className="relative w-full h-64 mb-6 rounded-lg overflow-hidden"
+                        className="relative w-full h-64 mb-8 rounded-lg overflow-hidden bg-[#99d4f2]/10"
                         whileHover={{
-                            scale: 1.1,
+                            scale: 1.05,
                             rotate: 2
                         }}
                         transition={{ type: "spring", stiffness: 300 }}
@@ -200,14 +200,14 @@ const GameQuestion = ({
                             src={url_imagen}
                             alt=""
                             fill
-                            className="object-contain"
+                            className="object-contain p-4"
                         />
                     </motion.div>
                 )}
 
                 {/* Consigna con animación */}
                 <motion.h2
-                    className="text-2xl font-bold text-center mb-8 text-gray-800"
+                    className="text-2xl font-bold text-center mb-8 text-gray-800 bg-[#fec0bb]/10 p-4 rounded-lg"
                     animate={{
                         y: [0, -5, 0]
                     }}
@@ -226,12 +226,12 @@ const GameQuestion = ({
                         <motion.button
                             key={index}
                             whileHover={{
-                                scale: 1.15,
-                                rotate: 3,
-                                boxShadow: "0 0 25px rgba(254, 192, 187, 0.6)"
+                                scale: 1.05,
+                                rotate: 2,
+                                boxShadow: "0 0 25px rgba(153, 212, 242, 0.3)"
                             }}
                             whileTap={{
-                                scale: 0.85
+                                scale: 0.95
                             }}
                             onClick={() => handleAnswerClick(index)}
                             disabled={!isMultipleChoice && selectedAnswers.length > 0}
@@ -249,59 +249,46 @@ const GameQuestion = ({
                                 }
                             `}
                         >
-                            <motion.div
-                                className="flex items-center space-x-4"
-                                whileHover={{ x: 10 }}
-                            >
-                                {respuesta.urlImg && (
-                                    <motion.div
-                                        className="relative w-16 h-16"
-                                        whileHover={{
-                                            rotate: 360,
-                                            scale: 1.3
-                                        }}
-                                        transition={{ duration: 0.5 }}
-                                    >
-                                        <Image
-                                            src={respuesta.urlImg}
-                                            alt={`Respuesta ${index + 1}`}
-                                            fill
-                                            className="object-contain"
-                                        />
-                                    </motion.div>
-                                )}
-                                <motion.span
-                                    className="text-lg font-medium text-gray-700"
-                                    whileHover={{ scale: 1.2 }}
-                                >
-                                    {respuesta.texto}
-                                </motion.span>
-                            </motion.div>
+                            {respuesta.urlImg && (
+                                <div className="relative w-full h-32 mb-2">
+                                    <Image
+                                        src={respuesta.urlImg}
+                                        alt=""
+                                        fill
+                                        className="object-contain"
+                                    />
+                                </div>
+                            )}
+                            <span className="text-lg font-medium block text-center">
+                                {respuesta.texto}
+                            </span>
                         </motion.button>
                     ))}
                 </div>
 
                 {isMultipleChoice && (
-                    <motion.button
-                        className="mt-6 bg-[#99d4f2] text-white px-6 py-3 rounded-full text-lg font-bold hover:bg-[#fec0bb] transition-colors mx-auto block"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={handleSubmit}
-                        disabled={selectedAnswers.length === 0}
+                    <motion.div
+                        className="mt-6 text-center"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                     >
-                        Verificar Respuestas
-                    </motion.button>
+                        <motion.button
+                            onClick={handleSubmit}
+                            disabled={selectedAnswers.length === 0}
+                            className="px-6 py-3 bg-[#99d4f2] text-white rounded-full font-bold hover:bg-[#fec0bb] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            Comprobar respuestas
+                        </motion.button>
+                    </motion.div>
                 )}
             </motion.div>
 
             <AnimatePresence>
                 {showBigFeedback && (
                     <FeedbackMessage
-                        esCorrecta={isMultipleChoice
-                            ? selectedAnswers.every(index => respuestas[index].esCorrecta) &&
-                            respuestas.filter(r => r.esCorrecta).every((_, index) => selectedAnswers.includes(index))
-                            : respuestas[selectedAnswers[0]].esCorrecta
-                        }
+                        esCorrecta={selectedAnswers.every(index => respuestas[index].esCorrecta)}
                     />
                 )}
             </AnimatePresence>
