@@ -57,6 +57,12 @@ enum TipoJuego {
   ORDEN
 }
 
+enum RangoEdad {
+  TODOS
+  DE_4_A_6
+  DE_7_A_10
+}
+
 model Persona {
   id        BigInt   @id @default(autoincrement())
   nombre    String
@@ -249,6 +255,7 @@ model Juego {
   fonoIdCreado     BigInt
   fechaCreado      DateTime
   tipoJuego        TipoJuego?
+  rangoEdad        RangoEdad @default(TODOS)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -334,6 +341,16 @@ model Usuario {
   persona          Persona          @relation(fields: [personaId], references: [id])
   juegosCreados    Juego[]
   instanciasJuego  InstanciaJuego[]
+}
+
+model Nivel {
+  id          BigInt   @id @default(autoincrement())
+  nivel       Int
+  exp_minima  Int
+  exp_maxima  Int
+  descripcion String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Turno {
