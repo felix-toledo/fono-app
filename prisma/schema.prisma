@@ -48,6 +48,12 @@ enum EstadosTurno {
   REALIZADO
 }
 
+enum EstadoJuego {
+  GANADO
+  PERDIDO
+  ERROR
+}
+
 enum TipoJuego {
   ROLES
   EMOCIONES
@@ -298,18 +304,13 @@ model InstanciaJuego {
   pacienteId       BigInt
   juegoId          BigInt
   expGanada        Decimal?
-  puntuacion       Decimal?
-  jugado           Boolean
   fechaJuego       DateTime?
-  fechaAsignacion  DateTime
-  fonoAsignadorId  BigInt
-  tiempoTotal      DateTime?
+  estado           EstadoJuego @default(ERROR)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   paciente         Paciente        @relation(fields: [pacienteId], references: [id])
   juego            Juego           @relation(fields: [juegoId], references: [id])
-  fonoAsignador    Usuario         @relation(fields: [fonoAsignadorId], references: [id])
   rptaCampos       RptaCampo[]
 }
 
@@ -340,7 +341,6 @@ model Usuario {
 
   persona          Persona          @relation(fields: [personaId], references: [id])
   juegosCreados    Juego[]
-  instanciasJuego  InstanciaJuego[]
 }
 
 model Nivel {

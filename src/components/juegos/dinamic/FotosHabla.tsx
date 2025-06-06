@@ -18,9 +18,10 @@ interface FotosHablaProps {
     textoCompleto: string;
     textoSinCompletar: string;
     palabraACompletar: string;
+    onGameComplete: (resultado: string, puntaje?: string) => void;
 }
 
-export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSinCompletar, palabraACompletar }: FotosHablaProps) {
+export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSinCompletar, palabraACompletar, onGameComplete }: FotosHablaProps) {
     const [transcripcion, setTranscripcion] = useState('');
     const [resultado, setResultado] = useState<'pendiente' | 'correcto' | 'incorrecto'>('pendiente');
     const [isLoading, setIsLoading] = useState(false);
@@ -47,8 +48,10 @@ export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSin
         const recibido = normalizarTexto(texto);
         if (recibido === esperado) {
             setResultado('correcto');
+            handleSubmit(); // Automatically submit when correct
         } else {
             setResultado('incorrecto');
+            handleSubmit(); // Also submit when incorrect
         }
     };
 
@@ -78,6 +81,11 @@ export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSin
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleSubmit = () => {
+        const esCorrecta = resultado === 'correcto';
+        onGameComplete(esCorrecta ? 'GANADO' : 'PERDIDO', esCorrecta ? '10' : undefined);
     };
 
     return (
@@ -204,6 +212,15 @@ export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSin
                     Tu respuesta: <span className="font-bold text-[#99d4f2]">{transcripcion}</span>
                 </motion.div>
             )}
+
+            <div className="mt-8">
+                <button
+                    onClick={handleSubmit}
+                    className="px-6 py-3 bg-[#99d4f2] text-white rounded-full font-bold hover:bg-[#fec0bb] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                    {resultado === 'correcto' ? '¡Correcto! Continuar' : '¡Incorrecto! Intentar de nuevo'}
+                </button>
+            </div>
         </motion.div>
     );
 }
