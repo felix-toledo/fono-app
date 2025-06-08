@@ -49,6 +49,7 @@ export default function Juegos() {
     const [formData, setFormData] = useState({
         titulo: '',
         rama: 'Pragmatica',
+        rangoEdad: 'TODOS',
         descripcion: '',
         nivelDificultad: 1,
         experienciaDada: 10,
@@ -73,6 +74,7 @@ export default function Juegos() {
         setFormData({
             titulo: '',
             rama: 'Pragmatica',
+            rangoEdad: 'TODOS',
             descripcion: '',
             nivelDificultad: 1,
             experienciaDada: 10,
@@ -173,6 +175,7 @@ export default function Juegos() {
             formDataToSend.append('gameData', JSON.stringify({
                 titulo: formData.titulo,
                 rama: formData.rama,
+                rangoEdad: formData.rangoEdad,
                 descripcion: formData.descripcion,
                 nivelDificultad: formData.nivelDificultad,
                 experienciaDada: formData.experienciaDada,
@@ -729,6 +732,24 @@ export default function Juegos() {
                             <option value="Semantica">Semántica</option>
                             <option value="Fonologia_y_Fonetica">Fonología y Fonética</option>
                             <option value="Morfosintaxis">Morfosintaxis</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label htmlFor="rangoEdad" className="block text-sm font-medium mb-2">
+                            Rango de Edad
+                        </label>
+                        <select
+                            id="rangoEdad"
+                            name="rangoEdad"
+                            value={formData.rangoEdad}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded-md"
+                            required
+                        >
+                            <option value="TODOS">Todos</option>
+                            <option value="DE_4_A_6">De 4 a 6 años</option>
+                            <option value="DE_7_A_10">De 7 a 10 años</option>
                         </select>
                     </div>
 

@@ -20,6 +20,7 @@ interface Juego {
     id: string;
     titulo: string;
     rama: string;
+    rangoEdad: string;
     descripcion: string;
     nivelDificultad: string;
     experienciaDada: string;
@@ -37,6 +38,7 @@ export default function VerJuegosPage() {
     const [error, setError] = useState<string | null>(null);
     const [filtros, setFiltros] = useState({
         rama: '',
+        rangoEdad: '',
         tipoJuego: '',
         nivelDificultad: '',
         estado: ''
@@ -67,6 +69,7 @@ export default function VerJuegosPage() {
     const juegosFiltrados = juegos.filter(juego => {
         return (
             (!filtros.rama || juego.rama === filtros.rama) &&
+            (!filtros.rangoEdad || juego.rangoEdad === filtros.rangoEdad) &&
             (!filtros.tipoJuego || juego.tipoJuego === filtros.tipoJuego) &&
             (!filtros.nivelDificultad || juego.nivelDificultad === filtros.nivelDificultad) &&
             (!filtros.estado || (juego.estado ? 'ACTIVO' : 'INACTIVO') === filtros.estado)
@@ -172,6 +175,7 @@ export default function VerJuegosPage() {
 
     // Obtener valores únicos para los filtros
     const ramas = Array.from(new Set(juegos.map(j => j.rama)));
+    const rangosEdad = Array.from(new Set(juegos.map(j => j.rangoEdad)));
     const tiposJuego = Array.from(new Set(juegos.map(j => j.tipoJuego)));
     const nivelesDificultad = Array.from(new Set(juegos.map(j => j.nivelDificultad)));
     const estados = ['ACTIVO', 'INACTIVO'];
@@ -194,6 +198,17 @@ export default function VerJuegosPage() {
                         <option value="">Todas las ramas</option>
                         {ramas.map(rama => (
                             <option key={rama} value={rama}>{rama}</option>
+                        ))}
+                    </select>
+
+                    <select
+                        className="border rounded p-2"
+                        value={filtros.rangoEdad}
+                        onChange={(e) => setFiltros(prev => ({ ...prev, rangoEdad: e.target.value }))}
+                    >
+                        <option value="">Todos los rangos</option>
+                        {rangosEdad.map(rango => (
+                            <option key={rango} value={rango}>{rango}</option>
                         ))}
                     </select>
 
@@ -241,6 +256,9 @@ export default function VerJuegosPage() {
                             <div className="flex gap-2">
                                 <span className="px-2 py-1 bg-gray-100 rounded-full text-sm">
                                     {juego.rama}
+                                </span>
+                                <span className="px-2 py-1 bg-gray-100 rounded-full text-sm">
+                                    {juego.rangoEdad}
                                 </span>
                                 <span className="px-2 py-1 bg-gray-100 rounded-full text-sm">
                                     {juego.nivelDificultad}

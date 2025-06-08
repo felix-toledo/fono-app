@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import GameQuestion from './dinamic/GameQuestion';
 import FotosHabla from './dinamic/FotosHabla';
 import OrdenGame from './dinamic/OrdenGame';
@@ -52,6 +52,7 @@ export default function GamePreview({ isOpen, onClose, gameType, gameData }: Gam
                         textoCompleto={gameData.textoRepetir || ''}
                         textoSinCompletar={gameData.textoRepetir || ''}
                         palabraACompletar={gameData.textoRepetir || ''}
+                        onGameComplete={() => { }}
                     />
                 );
 
@@ -63,6 +64,7 @@ export default function GamePreview({ isOpen, onClose, gameType, gameData }: Gam
                         textoCompleto={gameData.textoCompleto || ''}
                         textoSinCompletar={gameData.textoIncompleto || ''}
                         palabraACompletar={gameData.palabraCompletar || ''}
+                        onGameComplete={() => { }}
                     />
                 );
 

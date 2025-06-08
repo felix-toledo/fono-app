@@ -17,6 +17,7 @@ export async function POST(request: Request) {
                 nivelDificultad: gameData.nivelDificultad,
                 experienciaDada: gameData.experienciaDada,
                 estado: gameData.estado,
+                rangoEdad: gameData.rangoEdad,
                 fonoIdCreado: gameData.fonoIdCreado,
                 fechaCreado: new Date(gameData.fechaCreado),
                 tipoJuego: gameData.tipoJuego,

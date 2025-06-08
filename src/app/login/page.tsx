@@ -79,7 +79,7 @@ export default function Login() {
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-primary">Sistema para Fonoaudiólogos</h1>
+                    <h1 className="text-3xl font-bold text-primary">Fonolingo</h1>
                     <p className="text-gray-600 mt-2">Inicia sesión para acceder a la plataforma</p>
                 </div>
 
