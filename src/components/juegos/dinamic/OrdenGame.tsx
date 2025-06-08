@@ -12,9 +12,9 @@ interface PalabraOrden {
 
 interface OrdenGameProps {
     imagenes: string[];
-    palabras: PalabraOrden[];
+    palabras: { palabra: string; orden: number }[];
     consigna: string;
-    onOrdenCompletado: (esCorrecto: boolean) => void;
+    onOrdenCompletado: (esCorrecta: boolean) => void;
 }
 
 const FeedbackMessage = ({ esCorrecta }: { esCorrecta: boolean }) => {
@@ -85,7 +85,12 @@ const FeedbackMessage = ({ esCorrecta }: { esCorrecta: boolean }) => {
     );
 };
 
-const OrdenGame = ({ imagenes, palabras, consigna, onOrdenCompletado }: OrdenGameProps) => {
+const OrdenGame: React.FC<OrdenGameProps> = ({
+    imagenes,
+    palabras,
+    consigna,
+    onOrdenCompletado
+}) => {
     const { isMuted } = useGameSound();
     const [ordenadoPalabras, setOrdenadoPalabras] = useState<PalabraOrden[]>(palabras);
     const [seleccionActual, setSeleccionActual] = useState<number>(1);
@@ -129,6 +134,13 @@ const OrdenGame = ({ imagenes, palabras, consigna, onOrdenCompletado }: OrdenGam
             onOrdenCompletado(esCorrecto);
             setShowBigFeedback(true);
         }
+    };
+
+    const handleSubmit = () => {
+        const esCorrecta = ordenSeleccionado.every((palabra, index) =>
+            palabra.orden === index + 1
+        );
+        onOrdenCompletado(esCorrecta);
     };
 
     return (

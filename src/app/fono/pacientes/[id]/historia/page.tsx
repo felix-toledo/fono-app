@@ -125,6 +125,52 @@ export default function HistoriaPaciente() {
             return;
         }
 
+        // Validar campos requeridos
+        const camposFaltantes: string[] = [];
+
+        // Validar Motivo de Consulta
+        if (!historiaData.motivo.razonConsulta.trim()) camposFaltantes.push('Razón de consulta');
+        if (!historiaData.motivo.derivacion.trim()) camposFaltantes.push('Derivación');
+        if (!historiaData.motivo.observaciones.trim()) camposFaltantes.push('Observaciones del motivo');
+
+        // Validar Antecedentes
+        if (!historiaData.antecedente.embarazoParto.trim()) camposFaltantes.push('Embarazo y parto');
+        if (!historiaData.antecedente.desarrolloPsicomotor.trim()) camposFaltantes.push('Desarrollo psicomotor');
+        if (!historiaData.antecedente.enfermedadesPrevias.trim()) camposFaltantes.push('Enfermedades previas');
+        if (!historiaData.antecedente.medicacionActual.trim()) camposFaltantes.push('Medicación actual');
+        if (!historiaData.antecedente.historiaFamiliar.trim()) camposFaltantes.push('Historia familiar');
+
+        // Validar Evaluación
+        if (!historiaData.evaluacion.lenguaje.trim()) camposFaltantes.push('Evaluación de lenguaje');
+        if (!historiaData.evaluacion.habla.trim()) camposFaltantes.push('Evaluación de habla');
+        if (!historiaData.evaluacion.voz.trim()) camposFaltantes.push('Evaluación de voz');
+        if (!historiaData.evaluacion.audicion.trim()) camposFaltantes.push('Evaluación de audición');
+        if (!historiaData.evaluacion.deglucion.trim()) camposFaltantes.push('Evaluación de deglución');
+
+        // Validar Diagnóstico
+        if (!historiaData.diagnostico.tipoTrastorno) camposFaltantes.push('Tipo de trastorno');
+        if (!historiaData.diagnostico.severidad.trim()) camposFaltantes.push('Severidad');
+        if (!historiaData.diagnostico.areasComprometidas) camposFaltantes.push('Áreas comprometidas');
+
+        // Validar Plan
+        if (!historiaData.plan.objetivos.trim()) camposFaltantes.push('Objetivos');
+        if (!historiaData.plan.tecnicas.trim()) camposFaltantes.push('Técnicas');
+        if (!historiaData.plan.participacionFamiliar.trim()) camposFaltantes.push('Participación familiar');
+
+        if (camposFaltantes.length > 0) {
+            toast.error(
+                <div>
+                    <p>Por favor complete los siguientes campos:</p>
+                    <ul className="list-disc pl-4 mt-2">
+                        {camposFaltantes.map((campo, index) => (
+                            <li key={index}>{campo}</li>
+                        ))}
+                    </ul>
+                </div>
+            );
+            return;
+        }
+
         try {
             const url = '/api/fono/pacientes/historia';
             const method = historiaData.id ? 'PUT' : 'POST';
@@ -143,9 +189,11 @@ export default function HistoriaPaciente() {
 
             if (response.ok) {
                 const data = await response.json();
-                setHistoriaData(data);
                 setIsEditing(false);
                 toast.success('Historia clínica guardada exitosamente');
+
+                // Recargar la historia clínica después de guardar
+                await loadHistoriaClinica();
 
                 if (data.id) {
                     loadEvoluciones(data.id);
@@ -177,7 +225,7 @@ export default function HistoriaPaciente() {
             return;
         }
 
-        if (!evolucion.avances?.trim() || !evolucion.observaciones?.trim() || !evolucion.cambiosPlan?.trim()) {
+        if (!evolucion.motivo?.trim() || !evolucion.avances?.trim() || !evolucion.observaciones?.trim() || !evolucion.cambiosPlan?.trim()) {
             toast.error('Todos los campos son requeridos');
             return;
         }
@@ -189,6 +237,7 @@ export default function HistoriaPaciente() {
             fechaSesion: evolucion.fechaSesion instanceof Date
                 ? evolucion.fechaSesion.toISOString()
                 : new Date(evolucion.fechaSesion).toISOString(),
+            motivo: evolucion.motivo.trim(),
             avances: evolucion.avances.trim(),
             observaciones: evolucion.observaciones.trim(),
             cambiosPlan: evolucion.cambiosPlan.trim()
@@ -248,6 +297,12 @@ export default function HistoriaPaciente() {
 
                     {historiaData && (
                         <>
+                            <HistoriaClinicaView
+                                historiaData={historiaData}
+                                isEditing={isEditing}
+                                onChange={handleChange}
+                            />
+
                             <div className="flex justify-end space-x-2 mb-4">
                                 {!isEditing ? (
                                     <Button variant="outline" onClick={() => setIsEditing(true)}>
@@ -267,11 +322,6 @@ export default function HistoriaPaciente() {
                                     </>
                                 )}
                             </div>
-                            <HistoriaClinicaView
-                                historiaData={historiaData}
-                                isEditing={isEditing}
-                                onChange={handleChange}
-                            />
 
                             <EvolucionesList
                                 evoluciones={evoluciones}
@@ -297,13 +347,11 @@ export default function HistoriaPaciente() {
                                 setHistoriaData({
                                     pacienteId: paciente.id,
                                     motivo: {
-                                        id: 0,
                                         razonConsulta: '',
                                         derivacion: '',
                                         observaciones: ''
                                     },
                                     antecedente: {
-                                        id: 0,
                                         embarazoParto: '',
                                         desarrolloPsicomotor: '',
                                         enfermedadesPrevias: '',
@@ -311,7 +359,6 @@ export default function HistoriaPaciente() {
                                         historiaFamiliar: ''
                                     },
                                     evaluacion: {
-                                        id: 0,
                                         lenguaje: '',
                                         habla: '',
                                         voz: '',
@@ -319,13 +366,11 @@ export default function HistoriaPaciente() {
                                         deglucion: ''
                                     },
                                     diagnostico: {
-                                        id: 0,
-                                        tipoTrastorno: '',
+                                        tipoTrastorno: 'Expresivos',
                                         severidad: '',
                                         areasComprometidas: 'Pragmatica'
                                     },
                                     plan: {
-                                        id: 0,
                                         objetivos: '',
                                         frecuenciaSesiones: 1,
                                         duracionTratamiento: 1,

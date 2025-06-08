@@ -37,26 +37,26 @@ export default function TurnosPaciente() {
     const [showEvolucionModal, setShowEvolucionModal] = useState(false);
     const [selectedTurno, setSelectedTurno] = useState<Turno | null>(null);
 
-    useEffect(() => {
-        const fetchTurnos = async () => {
-            try {
-                const response = await fetch(`/api/pacientes/${params.id}/turnos`);
-                if (!response.ok) {
-                    throw new Error('Error al obtener los turnos');
-                }
-                const data = await response.json();
-                setTurnos(data.map((turno: any) => ({
-                    ...turno,
-                    fecha: new Date(turno.fecha)
-                })));
-            } catch (error) {
-                console.error('Error fetching appointments:', error);
-                setError('No se pudieron cargar los turnos');
-            } finally {
-                setLoading(false);
+    const fetchTurnos = async () => {
+        try {
+            const response = await fetch(`/api/pacientes/${params.id}/turnos`);
+            if (!response.ok) {
+                throw new Error('Error al obtener los turnos');
             }
-        };
+            const data = await response.json();
+            setTurnos(data.map((turno: any) => ({
+                ...turno,
+                fecha: new Date(turno.fecha)
+            })));
+        } catch (error) {
+            console.error('Error fetching appointments:', error);
+            setError('No se pudieron cargar los turnos');
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchTurnos();
     }, [params.id]);
 
@@ -107,6 +107,9 @@ export default function TurnosPaciente() {
 
     const handleEvolucionSave = async (evolucionData: any) => {
         try {
+            if (!selectedTurno) return;
+
+            // Primero guardamos la evolución
             const evolucionResponse = await fetch('/api/fono/pacientes/evolucion', {
                 method: 'POST',
                 headers: {
@@ -114,8 +117,9 @@ export default function TurnosPaciente() {
                 },
                 body: JSON.stringify({
                     ...evolucionData,
-                    historiaClinicaId: selectedTurno?.historiaClinicaId,
-                    fonoId: params.id
+                    historiaClinicaId: selectedTurno.historiaClinicaId,
+                    fonoId: params.id,
+                    motivo: evolucionData.motivo || 'Asistencia_de_Turno'
                 })
             });
 
@@ -124,7 +128,8 @@ export default function TurnosPaciente() {
                 throw new Error(errorData.error || 'Error al guardar la evolución');
             }
 
-            const turnoResponse = await fetch(`/api/turnos/${selectedTurno?.id}`, {
+            // Luego actualizamos el estado del turno
+            const turnoResponse = await fetch(`/api/turnos/${selectedTurno.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -135,19 +140,15 @@ export default function TurnosPaciente() {
             });
 
             if (!turnoResponse.ok) {
-                const errorData = await turnoResponse.json();
+                const errorData = await evolucionResponse.json();
                 throw new Error(errorData.error || 'Error al actualizar el estado del turno');
             }
 
-            setTurnos(turnos.map(turno =>
-                turno.id === selectedTurno?.id
-                    ? { ...turno, estado: 'REALIZADO' }
-                    : turno
-            ));
-
+            // Recargar los turnos
+            await fetchTurnos();
+            toast.success('Evolución guardada y turno marcado como realizado');
             setShowEvolucionModal(false);
             setSelectedTurno(null);
-            toast.success('Evolución guardada y turno marcado como realizado');
         } catch (error) {
             console.error('Error saving evolution:', error);
             toast.error(error instanceof Error ? error.message : 'Error al guardar la evolución');
@@ -246,6 +247,7 @@ export default function TurnosPaciente() {
                                 historiaClinicaId: selectedTurno.historiaClinicaId!,
                                 fonoId: Number(params.id),
                                 fechaSesion: selectedTurno.fecha,
+                                motivo: 'Asistencia_de_Turno',
                                 avances: '',
                                 observaciones: '',
                                 cambiosPlan: ''

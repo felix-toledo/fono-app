@@ -1,12 +1,12 @@
 export interface MotivoConsulta {
-    id: number;
+    id?: number;
     razonConsulta: string;
     derivacion: string;
     observaciones: string;
 }
 
 export interface Antecedentes {
-    id: number;
+    id?: number;
     embarazoParto: string;
     desarrolloPsicomotor: string;
     enfermedadesPrevias: string;
@@ -15,7 +15,7 @@ export interface Antecedentes {
 }
 
 export interface EvaluacionFono {
-    id: number;
+    id?: number;
     lenguaje: string;
     habla: string;
     voz: string;
@@ -24,14 +24,14 @@ export interface EvaluacionFono {
 }
 
 export interface DiagnosticoFono {
-    id: number;
-    tipoTrastorno: string;
+    id?: number;
+    tipoTrastorno: 'Expresivos' | 'Mixtos' | 'Procesamiento_y_Formulacion' | '';
     severidad: string;
-    areasComprometidas: 'Pragmatica' | 'Semantica' | 'Fonologia_y_Fonetica' | 'Morfosintaxis';
+    areasComprometidas: 'Pragmatica' | 'Semantica' | 'Fonologia_y_Fonetica' | 'Morfosintaxis' | '';
 }
 
 export interface PlanFono {
-    id: number;
+    id?: number;
     objetivos: string;
     frecuenciaSesiones: number;
     duracionTratamiento: number;

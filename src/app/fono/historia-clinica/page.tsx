@@ -4,16 +4,8 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MotivoConsulta } from '@/components/historia-clinica/MotivoConsulta';
-import { Antecedentes } from '@/components/historia-clinica/Antecedentes';
-import { EvaluacionFono } from '@/components/historia-clinica/EvaluacionFono';
-import { DiagnosticoFono } from '@/components/historia-clinica/DiagnosticoFono';
-import { PlanFono } from '@/components/historia-clinica/PlanFono';
-import { EvolucionFono } from '@/components/historia-clinica/EvolucionFono';
 import { useFono } from '@/contexts/FonoContext';
-import type { HistoriaClinica as HistoriaClinicaType } from '@/types/historia-clinica';
 import type { Paciente } from '@/types/paciente';
-import type { EvolucionFono as EvolucionFonoType } from '@/types/evolucion-fono';
 import {
     FileText,
     PenSquare,
@@ -25,65 +17,18 @@ import {
     History,
     Search
 } from 'lucide-react';
-import { HistoriaClinicaView } from '@/components/historia-clinica/HistoriaClinicaView';
-import { EvolucionesList } from '@/components/historia-clinica/EvolucionesList';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Loader } from '@/components/Loader';
-
-const initialHistoriaClinica: HistoriaClinicaType = {
-    pacienteId: 0,
-    motivo: {
-        id: 0,
-        razonConsulta: '',
-        derivacion: '',
-        observaciones: ''
-    },
-    antecedente: {
-        id: 0,
-        embarazoParto: '',
-        desarrolloPsicomotor: '',
-        enfermedadesPrevias: '',
-        medicacionActual: '',
-        historiaFamiliar: ''
-    },
-    evaluacion: {
-        id: 0,
-        lenguaje: '',
-        habla: '',
-        voz: '',
-        audicion: '',
-        deglucion: ''
-    },
-    diagnostico: {
-        id: 0,
-        tipoTrastorno: '',
-        severidad: '',
-        areasComprometidas: 'Pragmatica'
-    },
-    plan: {
-        id: 0,
-        objetivos: '',
-        frecuenciaSesiones: 1,
-        duracionTratamiento: 1,
-        tecnicas: '',
-        participacionFamiliar: '',
-        estado: 'Activa'
-    }
-};
+import { useRouter } from 'next/navigation';
 
 export default function HistoriaClinica() {
+    const router = useRouter();
     const { getFonoId } = useFono();
-    const [historiaData, setHistoriaData] = useState<HistoriaClinicaType | null>(null);
-    const [isEditing, setIsEditing] = useState(false);
     const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
-    const [evoluciones, setEvoluciones] = useState<EvolucionFonoType[]>([]);
-    const [isAddingEvolucion, setIsAddingEvolucion] = useState(false);
-    const [selectedEvolucion, setSelectedEvolucion] = useState<EvolucionFonoType | null>(null);
     const [pacientes, setPacientes] = useState<Paciente[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoadingPacientes, setIsLoadingPacientes] = useState(false);
-    const [isLoadingHistoria, setIsLoadingHistoria] = useState(false);
 
     useEffect(() => {
         const fonoId = getFonoId();
@@ -91,12 +36,6 @@ export default function HistoriaClinica() {
             loadPacientes(fonoId);
         }
     }, [getFonoId]);
-
-    useEffect(() => {
-        if (selectedPaciente) {
-            loadHistoriaClinica();
-        }
-    }, [selectedPaciente]);
 
     const loadPacientes = async (fonoId: number) => {
         setIsLoadingPacientes(true);
@@ -116,178 +55,9 @@ export default function HistoriaClinica() {
         }
     };
 
-    const loadHistoriaClinica = async () => {
-        if (!selectedPaciente) return;
-        setIsLoadingHistoria(true);
 
-        try {
-            const response = await fetch(`/api/fono/pacientes/historia?pacienteId=${selectedPaciente.id}`);
-            if (response.ok) {
-                const data = await response.json();
-                if (data) {
-                    setHistoriaData(data);
-                    loadEvoluciones(data.id);
-                } else {
-                    setHistoriaData(null);
-                }
-            } else {
-                toast.error('Error al cargar la historia clínica');
-            }
-        } catch (error) {
-            console.error('Error loading clinical history:', error);
-            toast.error('Error al cargar la historia clínica');
-        } finally {
-            setIsLoadingHistoria(false);
-        }
-    };
-
-    const loadEvoluciones = async (historiaId: number) => {
-        try {
-            const response = await fetch(`/api/fono/pacientes/evolucion?historiaId=${historiaId}`);
-            if (response.ok) {
-                const data = await response.json();
-                setEvoluciones(data);
-            }
-        } catch (error) {
-            console.error('Error loading evolutions:', error);
-        }
-    };
-
-    const handleChange = <T extends keyof HistoriaClinicaType>(
-        section: T,
-        field: keyof HistoriaClinicaType[T],
-        value: string | number
-    ) => {
-        if (!historiaData) return;
-
-        let processedValue = value;
-        if (typeof value === 'number' && isNaN(value)) {
-            processedValue = 1;
-        }
-
-        setHistoriaData(prev => {
-            if (!prev) return prev;
-            return {
-                ...prev,
-                [section]: {
-                    ...(prev[section] as any),
-                    [field]: processedValue
-                }
-            };
-        });
-    };
-
-    const handleGuardar = async () => {
-        if (!historiaData || !selectedPaciente) return;
-
-        const fonoId = getFonoId();
-        if (!fonoId) {
-            toast.error('Error: ID de fonoaudiólogo no encontrado');
-            return;
-        }
-
-        try {
-            const url = '/api/fono/pacientes/historia';
-            const method = historiaData.id ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    ...historiaData,
-                    pacienteId: selectedPaciente.id,
-                    fonoId: Number(fonoId)
-                })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setHistoriaData(data);
-                setIsEditing(false);
-                toast.success('Historia clínica guardada exitosamente');
-
-                if (data.id) {
-                    loadEvoluciones(data.id);
-                }
-            } else {
-                const error = await response.json();
-                throw new Error(error.error || 'Error al guardar la historia clínica');
-            }
-        } catch (error) {
-            console.error('Error saving:', error);
-            toast.error(error instanceof Error ? error.message : 'Error al guardar la historia clínica');
-        }
-    };
-
-    const handleNuevaHistoria = () => {
-        if (!selectedPaciente) return;
-
-        setHistoriaData({
-            ...initialHistoriaClinica,
-            pacienteId: selectedPaciente.id
-        });
-        setIsEditing(true);
-    };
-
-    const handleGuardarEvolucion = async (evolucion: EvolucionFonoType) => {
-        if (!historiaData) {
-            toast.error('No hay historia clínica seleccionada');
-            return;
-        }
-
-        if (!historiaData.id) {
-            toast.error('La historia clínica debe ser guardada primero');
-            return;
-        }
-
-        const fonoId = getFonoId();
-        if (!fonoId) {
-            toast.error('Error: ID de fonoaudiólogo no encontrado');
-            return;
-        }
-
-        if (!evolucion.avances?.trim() || !evolucion.observaciones?.trim() || !evolucion.cambiosPlan?.trim()) {
-            toast.error('Todos los campos son requeridos');
-            return;
-        }
-
-        const evolucionCompleta = {
-            id: evolucion.id || 0,
-            historiaClinicaId: Number(historiaData.id),
-            fonoId: Number(fonoId),
-            fechaSesion: evolucion.fechaSesion instanceof Date
-                ? evolucion.fechaSesion.toISOString()
-                : new Date(evolucion.fechaSesion).toISOString(),
-            avances: evolucion.avances.trim(),
-            observaciones: evolucion.observaciones.trim(),
-            cambiosPlan: evolucion.cambiosPlan.trim()
-        };
-
-        try {
-            const response = await fetch('/api/fono/pacientes/evolucion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(evolucionCompleta)
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Error al guardar la evolución');
-            }
-
-            const data = await response.json();
-            setEvoluciones(prev => [data, ...prev]);
-            setIsAddingEvolucion(false);
-            setSelectedEvolucion(null);
-            toast.success('Evolución guardada exitosamente');
-        } catch (error) {
-            console.error('Error saving evolution:', error);
-            toast.error(error instanceof Error ? error.message : 'Error al guardar la evolución');
-        }
+    const handlePacienteSelect = (paciente: Paciente) => {
+        router.push(`/fono/pacientes/${paciente.id}/historia`);
     };
 
     const filteredPacientes = pacientes.filter(paciente =>
@@ -326,7 +96,7 @@ export default function HistoriaClinica() {
                                     <Card
                                         key={paciente.id}
                                         className="p-4 cursor-pointer hover:bg-gray-50"
-                                        onClick={() => setSelectedPaciente(paciente)}
+                                        onClick={() => handlePacienteSelect(paciente)}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div>
@@ -349,76 +119,7 @@ export default function HistoriaClinica() {
                             </div>
                         )}
                     </div>
-                ) : (
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h2 className="text-xl font-semibold">
-                                    {selectedPaciente.nombre} {selectedPaciente.apellido}
-                                </h2>
-                                <p className="text-gray-600">DNI: {selectedPaciente.dni}</p>
-                            </div>
-                            <div className="flex space-x-2">
-                                <Button variant="outline" onClick={() => setSelectedPaciente(null)}>
-                                    Cambiar Paciente
-                                </Button>
-                                {!historiaData && (
-                                    <Button onClick={handleNuevaHistoria}>
-                                        <Plus className="h-4 w-4 mr-2" />
-                                        Nueva Historia
-                                    </Button>
-                                )}
-                                {historiaData && !isEditing && (
-                                    <Button variant="outline" onClick={() => setIsEditing(true)}>
-                                        <PenSquare className="h-4 w-4 mr-2" />
-                                        Editar
-                                    </Button>
-                                )}
-                                {isEditing && (
-                                    <>
-                                        <Button variant="outline" onClick={() => setIsEditing(false)}>
-                                            <X className="h-4 w-4 mr-2" />
-                                            Cancelar
-                                        </Button>
-                                        <Button onClick={handleGuardar}>
-                                            <Check className="h-4 w-4 mr-2" />
-                                            Guardar
-                                        </Button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        {isLoadingHistoria ? (
-                            <Loader />
-                        ) : historiaData && (
-                            <>
-                                <HistoriaClinicaView
-                                    historiaData={historiaData}
-                                    isEditing={isEditing}
-                                    onChange={handleChange}
-                                />
-
-                                <EvolucionesList
-                                    evoluciones={evoluciones}
-                                    historiaId={historiaData.id || 0}
-                                    fonoId={Number(getFonoId())}
-                                    isAddingEvolucion={isAddingEvolucion}
-                                    selectedEvolucion={selectedEvolucion}
-                                    onAddEvolucion={() => {
-                                        setIsAddingEvolucion(true);
-                                        setSelectedEvolucion(null);
-                                    }}
-                                    onCancelEvolucion={() => {
-                                        setIsAddingEvolucion(false);
-                                        setSelectedEvolucion(null);
-                                    }}
-                                    onSaveEvolucion={handleGuardarEvolucion}
-                                />
-                            </>
-                        )}
-                    </div>
-                )}
+                ) : (<></>)}
             </Card>
         </div>
     );

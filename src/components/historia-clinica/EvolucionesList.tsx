@@ -57,11 +57,11 @@ export function EvolucionesList({
     const paginatedEvoluciones = filteredEvoluciones.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
     return (
-        <div className="border-t pt-6">
-            <div className="flex items-center justify-between mb-4">
+        <div className="border-t pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                 <h3 className="text-lg font-semibold">Evoluciones</h3>
                 {historiaId && (
-                    <Button onClick={onAddEvolucion}>
+                    <Button onClick={onAddEvolucion} className="w-full sm:w-auto">
                         <Plus className="h-4 w-4 mr-2" />
                         Nueva Evolución
                     </Button>
@@ -69,49 +69,58 @@ export function EvolucionesList({
             </div>
 
             {isAddingEvolucion && historiaId && (
-                <EvolucionFono
-                    data={{
-                        id: selectedEvolucion?.id || 0,
-                        historiaClinicaId: historiaId,
-                        fonoId: fonoId,
-                        fechaSesion: selectedEvolucion?.fechaSesion || new Date(),
-                        avances: selectedEvolucion?.avances || '',
-                        observaciones: selectedEvolucion?.observaciones || '',
-                        cambiosPlan: selectedEvolucion?.cambiosPlan || ''
-                    }}
-                    onSave={onSaveEvolucion}
-                    onCancel={onCancelEvolucion}
-                />
+                <div className="mb-4">
+                    <EvolucionFono
+                        data={{
+                            id: selectedEvolucion?.id || 0,
+                            historiaClinicaId: historiaId,
+                            fonoId: fonoId,
+                            fechaSesion: selectedEvolucion?.fechaSesion || new Date(),
+                            motivo: selectedEvolucion?.motivo || '',
+                            avances: selectedEvolucion?.avances || '',
+                            observaciones: selectedEvolucion?.observaciones || '',
+                            cambiosPlan: selectedEvolucion?.cambiosPlan || ''
+                        }}
+                        onSave={onSaveEvolucion}
+                        onCancel={onCancelEvolucion}
+                    />
+                </div>
             )}
 
             <div className="space-y-4">
                 {paginatedEvoluciones.map(evolucion => (
-                    <Card key={evolucion.id} className="p-4">
+                    <Card key={evolucion.id} className="p-3 sm:p-4">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center">
-                                <History className="h-4 w-4 mr-2 text-gray-500" />
-                                <span className="font-medium">
+                                <History className="h-4 w-4 mr-2 text-gray-500 flex-shrink-0" />
+                                <span className="font-medium text-sm sm:text-base">
                                     {formatDate(evolucion.fechaSesion).toLocaleDateString()}
                                 </span>
                             </div>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 text-sm sm:text-base">
+                            {evolucion.motivo && (
+                                <div className="break-words">
+                                    <h4 className="font-medium">Motivo:</h4>
+                                    <p className="text-gray-600 whitespace-pre-wrap">{evolucion.motivo}</p>
+                                </div>
+                            )}
                             {evolucion.avances && (
-                                <div>
+                                <div className="break-words">
                                     <h4 className="font-medium">Avances:</h4>
-                                    <p className="text-gray-600">{evolucion.avances}</p>
+                                    <p className="text-gray-600 whitespace-pre-wrap">{evolucion.avances}</p>
                                 </div>
                             )}
                             {evolucion.observaciones && (
-                                <div>
+                                <div className="break-words">
                                     <h4 className="font-medium">Observaciones:</h4>
-                                    <p className="text-gray-600">{evolucion.observaciones}</p>
+                                    <p className="text-gray-600 whitespace-pre-wrap">{evolucion.observaciones}</p>
                                 </div>
                             )}
                             {evolucion.cambiosPlan && (
-                                <div>
+                                <div className="break-words">
                                     <h4 className="font-medium">Cambios en el Plan:</h4>
-                                    <p className="text-gray-600">{evolucion.cambiosPlan}</p>
+                                    <p className="text-gray-600 whitespace-pre-wrap">{evolucion.cambiosPlan}</p>
                                 </div>
                             )}
                         </div>
@@ -126,10 +135,11 @@ export function EvolucionesList({
                         size="sm"
                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
+                        className="flex-shrink-0"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <span className="text-sm">
+                    <span className="text-sm whitespace-nowrap">
                         Página {currentPage} de {totalPages}
                     </span>
                     <Button
@@ -137,6 +147,7 @@ export function EvolucionesList({
                         size="sm"
                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
+                        className="flex-shrink-0"
                     >
                         <ChevronRight className="h-4 w-4" />
                     </Button>

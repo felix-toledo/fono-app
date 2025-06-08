@@ -4,7 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import type { EvolucionFono as EvolucionFonoType } from '@/types/evolucion-fono';
+import { usePathname } from 'next/navigation';
 
 interface EvolucionFonoProps {
     data: EvolucionFonoType;
@@ -13,11 +21,15 @@ interface EvolucionFonoProps {
 }
 
 export function EvolucionFono({ data, onSave, onCancel }: EvolucionFonoProps) {
+    const pathname = usePathname();
+    const isFromTurnos = pathname?.includes('/turnos');
+
     const [evolucion, setEvolucion] = useState<EvolucionFonoType>({
         id: data.id || 0,
         historiaClinicaId: data.historiaClinicaId,
         fonoId: data.fonoId,
         fechaSesion: data.fechaSesion || new Date(),
+        motivo: isFromTurnos ? 'Asistencia de Turno' : (data.motivo || ''),
         avances: data.avances || '',
         observaciones: data.observaciones || '',
         cambiosPlan: data.cambiosPlan || ''
@@ -29,23 +41,34 @@ export function EvolucionFono({ data, onSave, onCancel }: EvolucionFonoProps) {
             historiaClinicaId: data.historiaClinicaId,
             fonoId: data.fonoId,
             fechaSesion: data.fechaSesion || new Date(),
+            motivo: isFromTurnos ? 'Asistencia de Turno' : (data.motivo || ''),
             avances: data.avances || '',
             observaciones: data.observaciones || '',
             cambiosPlan: data.cambiosPlan || ''
         });
-    }, [data]);
+    }, [data, isFromTurnos]);
 
     const handleChange = (field: keyof EvolucionFonoType, value: string | Date) => {
-        setEvolucion(prev => ({
-            ...prev,
-            [field]: value
-        }));
+        console.log('Changing field:', field, 'to value:', value);
+        setEvolucion(prev => {
+            const newState = {
+                ...prev,
+                [field]: value
+            };
+            console.log('New state:', newState);
+            return newState;
+        });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        console.log('Submitting form with data:', evolucion);
 
         // Validar que todos los campos requeridos estén presentes y no estén vacíos
+        if (!evolucion.motivo?.trim()) {
+            console.error('El campo Motivo es requerido');
+            return;
+        }
         if (!evolucion.avances?.trim()) {
             console.error('El campo Avances es requerido');
             return;
@@ -69,10 +92,12 @@ export function EvolucionFono({ data, onSave, onCancel }: EvolucionFonoProps) {
             return;
         }
 
-        onSave({
+        const dataToSave = {
             ...evolucion,
             fechaSesion
-        });
+        };
+        console.log('Sending data to save:', dataToSave);
+        onSave(dataToSave);
     };
 
     return (
@@ -89,6 +114,26 @@ export function EvolucionFono({ data, onSave, onCancel }: EvolucionFonoProps) {
                         onChange={(e) => handleChange('fechaSesion', new Date(e.target.value))}
                         required
                     />
+                </div>
+
+                <div>
+                    <Label htmlFor="motivo">Motivo de la Sesión</Label>
+                    <Select
+                        value={evolucion.motivo}
+                        onValueChange={(value) => handleChange('motivo', value)}
+                        required
+                    >
+                        <SelectTrigger id="motivo">
+                            <SelectValue placeholder="Seleccione el motivo de la sesión" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Asistencia de Turno">Asistencia de Turno</SelectItem>
+                            <SelectItem value="Evaluación y Re-evaluación">Evaluación y Re-evaluación</SelectItem>
+                            <SelectItem value="Evolución del tratamiento">Evolución del tratamiento</SelectItem>
+                            <SelectItem value="Interacción con Familia y Contexto">Interacción con Familia y Contexto</SelectItem>
+                            <SelectItem value="Cierre o Alta">Cierre o Alta</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div>

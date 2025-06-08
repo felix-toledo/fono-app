@@ -24,6 +24,12 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    /*
+  body {
+    @apply bg-gradient-to-b from-green-100 to-blue-100 text-foreground m-0 p-0;
+  }
+}
+*/
+    @apply bg-gradient-to-b from-green-100 to-blue-100 text-foreground m-0 p-0;
   }
 }

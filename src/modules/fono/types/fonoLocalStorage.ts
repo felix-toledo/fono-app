@@ -12,3 +12,4 @@ export interface DatosFono {
     perfil: string;
     FotoPerfil: string;
 }
+

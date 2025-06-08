@@ -329,7 +329,8 @@ const Turnos = () => {
                 body: JSON.stringify({
                     ...evolucionData,
                     historiaClinicaId: selectedTurno.historiaClinicaId,
-                    fonoId: getFonoId()
+                    fonoId: getFonoId(),
+                    motivo: evolucionData.motivo || 'Asistencia_de_Turno'
                 })
             });
 
@@ -350,7 +351,7 @@ const Turnos = () => {
             });
 
             if (!turnoResponse.ok) {
-                const errorData = await turnoResponse.json();
+                const errorData = await evolucionResponse.json();
                 throw new Error(errorData.error || 'Error al actualizar el estado del turno');
             }
 
@@ -363,6 +364,11 @@ const Turnos = () => {
             console.error('Error saving evolution:', error);
             toast.error(error instanceof Error ? error.message : 'Error al guardar la evolución');
         }
+    };
+
+    // Agregar función para verificar si un horario está disponible
+    const isHorarioDisponible = (horario: string) => {
+        return !turnosDelDia.some(turno => turno.horario === horario);
     };
 
     // Actualizar la sección de turnos del día para mostrar los turnos reales
@@ -548,35 +554,43 @@ const Turnos = () => {
                                             <div>
                                                 <span className="text-xs font-semibold">Mañana</span>
                                                 <div className="flex flex-wrap gap-2 mt-1">
-                                                    {morningSlots.map(slot => (
-                                                        <Button
-                                                            key={slot.id}
-                                                            type="button"
-                                                            size="sm"
-                                                            variant={selectedSlot === slot.id ? "default" : "outline"}
-                                                            className="px-3 py-2"
-                                                            onClick={() => setSelectedSlot(slot.id)}
-                                                        >
-                                                            {slot.time}
-                                                        </Button>
-                                                    ))}
+                                                    {morningSlots.map(slot => {
+                                                        const isAvailable = isHorarioDisponible(slot.time);
+                                                        return (
+                                                            <Button
+                                                                key={slot.id}
+                                                                type="button"
+                                                                size="sm"
+                                                                variant={selectedSlot === slot.id ? "default" : "outline"}
+                                                                className={`px-3 py-2 ${!isAvailable ? 'opacity-95 cursor-not-allowed' : ''}`}
+                                                                onClick={() => isAvailable && setSelectedSlot(slot.id)}
+                                                                disabled={!isAvailable}
+                                                            >
+                                                                {slot.time}
+                                                            </Button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                             <div>
                                                 <span className="text-xs font-semibold">Tarde</span>
                                                 <div className="flex flex-wrap gap-2 mt-1">
-                                                    {afternoonSlots.map(slot => (
-                                                        <Button
-                                                            key={slot.id}
-                                                            type="button"
-                                                            size="sm"
-                                                            variant={selectedSlot === slot.id ? "default" : "outline"}
-                                                            className="px-3 py-2 "
-                                                            onClick={() => setSelectedSlot(slot.id)}
-                                                        >
-                                                            {slot.time}
-                                                        </Button>
-                                                    ))}
+                                                    {afternoonSlots.map(slot => {
+                                                        const isAvailable = isHorarioDisponible(slot.time);
+                                                        return (
+                                                            <Button
+                                                                key={slot.id}
+                                                                type="button"
+                                                                size="sm"
+                                                                variant={selectedSlot === slot.id ? "default" : "outline"}
+                                                                className={`px-3 py-2 ${!isAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                                onClick={() => isAvailable && setSelectedSlot(slot.id)}
+                                                                disabled={!isAvailable}
+                                                            >
+                                                                {slot.time}
+                                                            </Button>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         </div>
@@ -638,7 +652,8 @@ const Turnos = () => {
                                 fechaSesion: new Date(selectedTurno.fecha.split('/').reverse().join('-')),
                                 avances: '',
                                 observaciones: '',
-                                cambiosPlan: ''
+                                cambiosPlan: '',
+                                motivo: 'Asistencia_de_Turno'
                             }}
                             onSave={handleEvolucionSave}
                             onCancel={() => {
