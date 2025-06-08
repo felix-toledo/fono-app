@@ -272,7 +272,6 @@ export default function HistoriaPaciente() {
         return <div>Cargando...</div>;
     }
 
-    console.log(paciente);
 
     return (
         <div className="container mx-auto px-4 py-8">

@@ -62,7 +62,6 @@ export async function GET(request: Request) {
             }
         });
 
-        console.log(turnosHoy, pacientesTotal, Number(pacientesRegulares[0]?.count), turnosTotal);
 
         return NextResponse.json({
             turnosHoy,

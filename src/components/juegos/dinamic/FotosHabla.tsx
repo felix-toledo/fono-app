@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import AudioRecorder from '@/components/audio/Component';
+import { FeedbackMessage } from './FeedbackMessage';
 
 function normalizarTexto(texto: string) {
     return texto
@@ -18,15 +19,31 @@ interface FotosHablaProps {
     textoCompleto: string;
     textoSinCompletar: string;
     palabraACompletar: string;
-    onGameComplete: (resultado: string, puntaje?: string) => void;
+    onGameComplete: (estado: 'GANADO' | 'PERDIDO') => void;
+    allowRetry?: boolean;
 }
 
-export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSinCompletar, palabraACompletar, onGameComplete }: FotosHablaProps) {
+export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSinCompletar, palabraACompletar, onGameComplete, allowRetry = true }: FotosHablaProps) {
     const [transcripcion, setTranscripcion] = useState('');
-    const [resultado, setResultado] = useState<'pendiente' | 'correcto' | 'incorrecto'>('pendiente');
+    const [showBigFeedback, setShowBigFeedback] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const audioRef = useRef<any>(null);
-    const audioCacheRef = useRef<{ [key: string]: string }>({}); // cache por texto
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const audioCacheRef = useRef<{ [key: string]: string }>({});
+
+    // Reset state when game changes
+    useEffect(() => {
+        const resetState = () => {
+            setTranscripcion('');
+            setShowBigFeedback(false);
+            setIsLoading(false);
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
+        resetState();
+        return () => resetState();
+    }, [imagenes, consigna, textoCompleto, textoSinCompletar, palabraACompletar]);
 
     // Lógica para modo palabra única
     const esPalabraUnica =
@@ -44,15 +61,21 @@ export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSin
 
     const handleTranscripcion = (texto: string) => {
         setTranscripcion(texto);
-        const esperado = normalizarTexto(palabraACompletar);
-        const recibido = normalizarTexto(texto);
-        if (recibido === esperado) {
-            setResultado('correcto');
-            handleSubmit(); // Automatically submit when correct
-        } else {
-            setResultado('incorrecto');
-            handleSubmit(); // Also submit when incorrect
-        }
+        const textoNormalizado = normalizarTexto(texto);
+        const palabraNormalizada = normalizarTexto(palabraACompletar);
+        const esCorrecto = textoNormalizado === palabraNormalizada;
+
+        console.log('Texto normalizado:', textoNormalizado);
+        console.log('Palabra normalizada:', palabraNormalizada);
+        console.log('¿Es correcto?:', esCorrecto);
+
+        // Llamamos a onGameComplete con el estado correcto
+        const estadoFinal = esCorrecto ? 'GANADO' : 'PERDIDO';
+        console.log('Estado que se enviará a onGameComplete:', estadoFinal);
+        onGameComplete(estadoFinal);
+
+        // Mostramos el feedback
+        setShowBigFeedback(true);
     };
 
     const reproducirTexto = async () => {
@@ -83,13 +106,14 @@ export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSin
         }
     };
 
-    const handleSubmit = () => {
-        const esCorrecta = resultado === 'correcto';
-        onGameComplete(esCorrecta ? 'GANADO' : 'PERDIDO', esCorrecta ? '10' : undefined);
+    const handleFeedbackClose = () => {
+        setShowBigFeedback(false);
+        setTranscripcion('');
     };
 
     return (
         <motion.div
+            key={`${textoCompleto}-${textoSinCompletar}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg"
@@ -188,22 +212,15 @@ export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSin
             </div>
 
             <AnimatePresence>
-                {resultado !== 'pendiente' && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.5 }}
-                        className={`text-2xl font-bold text-center mt-6 p-4 rounded-lg ${resultado === 'correcto'
-                            ? 'bg-green-100 text-green-600'
-                            : 'bg-red-100 text-red-500'
-                            }`}
-                    >
-                        {resultado === 'correcto' ? '🎉 ¡Correcto!' : '💫 Intenta de nuevo'}
-                    </motion.div>
+                {showBigFeedback && (
+                    <FeedbackMessage
+                        esCorrecta={normalizarTexto(transcripcion) === normalizarTexto(palabraACompletar)}
+                        onClose={handleFeedbackClose}
+                    />
                 )}
             </AnimatePresence>
 
-            {transcripcion && (
+            {transcripcion && !showBigFeedback && (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

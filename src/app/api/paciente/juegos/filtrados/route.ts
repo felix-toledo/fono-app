@@ -55,7 +55,20 @@ export async function GET(request: Request) {
         // Get compromised area from active clinical history
         const areaComprometida = paciente.historiaClinica[0]?.diagnostico.areasComprometidas;
 
-        // 2. Fetch games with filters
+        // 2. Get games that the patient has already won
+        const juegosGanados = await prisma.instanciaJuego.findMany({
+            where: {
+                pacienteId: BigInt(pacienteId),
+                estado: 'GANADO'
+            },
+            select: {
+                juegoId: true
+            }
+        });
+
+        const juegosGanadosIds = juegosGanados.map(j => j.juegoId);
+
+        // 3. Fetch games with filters
         const juegos = await prisma.juego.findMany({
             where: {
                 AND: [
@@ -73,7 +86,8 @@ export async function GET(request: Request) {
                             { rama: undefined }
                         ]
                     },
-                    { estado: true } // Only active games
+                    { estado: true }, // Only active games
+                    { id: { notIn: juegosGanadosIds } } // Exclude games already won
                 ]
             },
             include: {

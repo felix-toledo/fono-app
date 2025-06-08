@@ -34,7 +34,6 @@ async function main() {
         }
     })
 
-    console.log('Default fonoaudiologo user created:', persona)
 }
 
 main()

@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="h-full">
-      <body className={`${inter.variable} antialiased h-full flex items-center justify-center`}>
+      <body className={`${inter.variable} antialiased h-full w-full`}>
         {children}
         <ToastContainer
           position="top-right"

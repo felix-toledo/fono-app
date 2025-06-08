@@ -57,7 +57,6 @@ export default function EditarPaciente({ params }: { params: { id: string } }) {
             }
 
             const data = await response.json();
-            console.log('Datos completos recibidos:', data); // Para debug
 
             setFormData({
                 persona: {

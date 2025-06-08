@@ -46,7 +46,6 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const data = await request.json();
-        console.log('Received data:', JSON.stringify(data, null, 2));
 
         const { historiaClinicaId, fonoId, fechaSesion, motivo, avances, observaciones, cambiosPlan } = data;
 
@@ -61,16 +60,6 @@ export async function POST(request: Request) {
         if (!cambiosPlan) missingFields.push('cambiosPlan');
 
         if (missingFields.length > 0) {
-            console.log('Missing fields:', missingFields);
-            console.log('Received values:', {
-                historiaClinicaId,
-                fonoId,
-                fechaSesion,
-                motivo,
-                avances,
-                observaciones,
-                cambiosPlan
-            });
             return NextResponse.json({
                 error: 'Missing required fields',
                 missingFields,
@@ -94,7 +83,6 @@ export async function POST(request: Request) {
         });
 
         if (!historiaClinica) {
-            console.log('Historia clínica no encontrada:', historiaClinicaId);
             return NextResponse.json(
                 { error: 'Historia clínica no encontrada' },
                 { status: 404 }
@@ -110,7 +98,6 @@ export async function POST(request: Request) {
         });
 
         if (!fonoHistoria) {
-            console.log('Fonoaudiólogo no tiene acceso a la historia:', { historiaClinicaId, fonoId });
             return NextResponse.json(
                 { error: 'No tiene acceso a esta historia clínica' },
                 { status: 403 }

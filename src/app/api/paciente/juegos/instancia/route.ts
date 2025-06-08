@@ -4,7 +4,12 @@ import { EstadoJuego } from '@prisma/client';
 
 export async function POST(request: Request) {
     try {
-        const { pacienteId, juegoId, expGanada, estado } = await request.json();
+        const body = await request.json();
+        console.log('Body completo recibido:', body);
+        const { pacienteId, juegoId, expGanada, estado } = body;
+
+        console.log('Estado recibido en API:', estado);
+        console.log('Tipo de estado:', typeof estado);
 
         // Create game instance
         const instancia = await prisma.instanciaJuego.create({
@@ -16,6 +21,8 @@ export async function POST(request: Request) {
                 estado: estado as EstadoJuego
             }
         });
+
+        console.log('Instancia creada:', instancia);
 
         // If game was won, update patient's experience
         if (estado === 'GANADO' && expGanada) {

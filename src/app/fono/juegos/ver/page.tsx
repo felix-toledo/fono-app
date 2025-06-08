@@ -80,8 +80,6 @@ export default function VerJuegosPage() {
         const campoJuego = juego.juegoCampoJs[0]?.campoJuego;
         if (!campoJuego) return null;
 
-        console.log('Preparando datos para juego:', juego.tipoJuego);
-        console.log('Campo Juego:', campoJuego);
 
         // Mapear según el tipo de juego
         switch (juego.tipoJuego) {
@@ -119,8 +117,6 @@ export default function VerJuegosPage() {
             case 'ROLES':
                 const opciones = campoJuego.opciones ? JSON.parse(campoJuego.opciones) : [];
                 const respuestaValida = campoJuego.rptaValida ? JSON.parse(campoJuego.rptaValida) : [];
-                console.log('Opciones parseadas:', opciones);
-                console.log('Respuesta válida parseada:', respuestaValida);
 
                 return {
                     preguntaPrincipal: campoJuego.consigna,
@@ -180,7 +176,6 @@ export default function VerJuegosPage() {
     const nivelesDificultad = Array.from(new Set(juegos.map(j => j.nivelDificultad)));
     const estados = ['ACTIVO', 'INACTIVO'];
 
-    console.log(juegosFiltrados);
 
     return (
         <div className="container mx-auto p-4">
@@ -306,10 +301,6 @@ export default function VerJuegosPage() {
             {/* Modal de Vista Previa */}
             {juegoSeleccionado && (() => {
                 const gameData = prepareGameData(juegoSeleccionado);
-                console.log('Datos enviados a GamePreview:', {
-                    gameType: juegoSeleccionado.tipoJuego,
-                    gameData
-                });
                 return (
                     <GamePreview
                         isOpen={showPreview}

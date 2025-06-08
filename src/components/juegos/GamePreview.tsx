@@ -16,6 +16,17 @@ export default function GamePreview({ isOpen, onClose, gameType, gameData }: Gam
 
     const renderGamePreview = () => {
         switch (gameType) {
+            case 'CONSIGNA':
+                return (
+                    <GameQuestion
+                        tipo_juego="select"
+                        url_imagen={gameData.url_imagen}
+                        consigna={gameData.consigna}
+                        respuestas={gameData.respuestas}
+                        onRespuestaSeleccionada={() => { }}
+                    />
+                );
+
             case 'ROLES':
                 return (
                     <GameQuestion
@@ -47,7 +58,7 @@ export default function GamePreview({ isOpen, onClose, gameType, gameData }: Gam
             case 'REPETIR':
                 return (
                     <FotosHabla
-                        imagenes={gameData.imagenRepetir ? [URL.createObjectURL(gameData.imagenRepetir)] : []}
+                        imagenes={gameData.imagenRepetir ? [gameData.imagenRepetir] : []}
                         consigna="Repite la palabra o frase"
                         textoCompleto={gameData.textoRepetir || ''}
                         textoSinCompletar={gameData.textoRepetir || ''}
@@ -59,19 +70,19 @@ export default function GamePreview({ isOpen, onClose, gameType, gameData }: Gam
             case 'HABLAR':
                 return (
                     <FotosHabla
-                        imagenes={gameData.imagenesHablar?.map((img: File) => URL.createObjectURL(img)) || []}
+                        imagenes={gameData.imagenesHablar?.map((img: File) => img) || []}
                         consigna={gameData.consignaEmociones || ''}
                         textoCompleto={gameData.textoCompleto || ''}
                         textoSinCompletar={gameData.textoIncompleto || ''}
                         palabraACompletar={gameData.palabraCompletar || ''}
-                        onGameComplete={() => { }}
+                        onGameComplete={() => { }} // Add this line
                     />
                 );
 
             case 'ORDEN':
                 return (
                     <OrdenGame
-                        imagenes={gameData.imagenesOrden?.map((img: File) => URL.createObjectURL(img)) || []}
+                        imagenes={gameData.imagenesOrden?.map((img: File) => img) || []}
                         palabras={gameData.palabrasOrdenadas?.map((palabra: string, index: number) => ({
                             palabra,
                             orden: index + 1

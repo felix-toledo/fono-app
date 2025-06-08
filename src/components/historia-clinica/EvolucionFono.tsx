@@ -49,20 +49,17 @@ export function EvolucionFono({ data, onSave, onCancel }: EvolucionFonoProps) {
     }, [data, isFromTurnos]);
 
     const handleChange = (field: keyof EvolucionFonoType, value: string | Date) => {
-        console.log('Changing field:', field, 'to value:', value);
         setEvolucion(prev => {
             const newState = {
                 ...prev,
                 [field]: value
             };
-            console.log('New state:', newState);
             return newState;
         });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Submitting form with data:', evolucion);
 
         // Validar que todos los campos requeridos estén presentes y no estén vacíos
         if (!evolucion.motivo?.trim()) {
@@ -96,7 +93,6 @@ export function EvolucionFono({ data, onSave, onCancel }: EvolucionFonoProps) {
             ...evolucion,
             fechaSesion
         };
-        console.log('Sending data to save:', dataToSave);
         onSave(dataToSave);
     };
 

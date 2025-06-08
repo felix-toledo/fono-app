@@ -5,41 +5,34 @@ import GamePreview from '@/components/juegos/GamePreview';
 import { useFono } from '@/contexts/FonoContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import BibliotecaImagen from '@/components/BibliotecaImagen';
+import Image from 'next/image';
+import { Image as ImageIcon } from 'lucide-react';
 
 interface Option {
     text: string;
     isCorrect: boolean;
+    urlImg?: string;
 }
 
 interface GameFields {
-    // ROLES
-    preguntaPrincipal?: string;
-    imagenRoles?: File | null;
-    opcionesRoles?: Option[];
-
-    // EMOCIONES
-    consignaEmociones?: string;
-    imagenEmociones?: File | null;
-    opcionesEmociones?: Option[];
+    // Consigna y Respuestas (combines ROLES and EMOCIONES)
+    consigna?: string;
+    imagenConsigna?: string;
+    opciones?: Option[];
 
     // REPETIR
     textoRepetir?: string;
-    imagenRepetir?: File | null;
+    imagenRepetir?: string;
 
     // HABLAR
-    imagenesHablar?: File[];
+    imagenesHablar?: string[];
     textoCompleto?: string;
     textoIncompleto?: string;
     palabraCompletar?: string;
 
-    // COMPLETAR
-    imagenesCompletar?: File[];
-    textoCompletoCompletar?: string;
-    textoIncompletoCompletar?: string;
-    opcionesCompletar?: string[];
-
     // ORDEN
-    imagenesOrden?: File[];
+    imagenesOrden?: string[];
     palabrasOrdenadas?: string[];
     consignaOrden?: string;
 }
@@ -58,14 +51,13 @@ export default function Juegos() {
     });
 
     const [showPreview, setShowPreview] = useState(false);
+    const [showBiblioteca, setShowBiblioteca] = useState(false);
+    const [currentImageField, setCurrentImageField] = useState<string>('');
 
     const [gameFields, setGameFields] = useState<GameFields>({
-        opcionesRoles: [{ text: '', isCorrect: false }],
-        opcionesEmociones: [{ text: '', isCorrect: false }],
-        opcionesCompletar: [''],
+        opciones: [{ text: '', isCorrect: false }],
         palabrasOrdenadas: [''],
         imagenesHablar: [],
-        imagenesCompletar: [],
         imagenesOrden: []
     });
 
@@ -82,12 +74,9 @@ export default function Juegos() {
             estado: true
         });
         setGameFields({
-            opcionesRoles: [{ text: '', isCorrect: false }],
-            opcionesEmociones: [{ text: '', isCorrect: false }],
-            opcionesCompletar: [''],
+            opciones: [{ text: '', isCorrect: false }],
             palabrasOrdenadas: [''],
             imagenesHablar: [],
-            imagenesCompletar: [],
             imagenesOrden: []
         });
     };
@@ -108,22 +97,11 @@ export default function Juegos() {
                 case 'ROLES':
                     gameFieldsData.push({
                         tipoCampo: 'elegir_respuesta',
-                        titulo: 'Roles',
-                        consigna: gameFields.preguntaPrincipal || '',
-                        rptaValida: JSON.stringify(gameFields.opcionesRoles?.filter(opt => opt.isCorrect).map(opt => opt.text) || []),
-                        opciones: JSON.stringify(gameFields.opcionesRoles?.map(opt => opt.text) || []),
-                        imagenConsigna: gameFields.imagenRoles,
-                    });
-                    break;
-
-                case 'EMOCIONES':
-                    gameFieldsData.push({
-                        tipoCampo: 'elegir_respuesta',
-                        titulo: 'Emociones',
-                        consigna: gameFields.consignaEmociones || '',
-                        rptaValida: JSON.stringify(gameFields.opcionesEmociones?.filter(opt => opt.isCorrect).map(opt => opt.text) || []),
-                        opciones: JSON.stringify(gameFields.opcionesEmociones?.map(opt => opt.text) || []),
-                        imagenConsigna: gameFields.imagenEmociones,
+                        titulo: 'Consigna y Respuestas',
+                        consigna: gameFields.consigna || '',
+                        rptaValida: gameFields.opciones?.filter(opt => opt.isCorrect).map(opt => opt.text) || [],
+                        opciones: gameFields.opciones || [],
+                        imagenConsigna: gameFields.imagenConsigna || null,
                     });
                     break;
 
@@ -133,7 +111,7 @@ export default function Juegos() {
                         titulo: 'Repetir',
                         consigna: 'Repite la siguiente frase',
                         rptaValida: gameFields.textoRepetir || '',
-                        imagenConsigna: gameFields.imagenRepetir,
+                        imagenConsigna: gameFields.imagenRepetir || null,
                     });
                     break;
 
@@ -144,16 +122,7 @@ export default function Juegos() {
                         consigna: gameFields.textoIncompleto || '',
                         rptaValida: gameFields.palabraCompletar || '',
                         opciones: JSON.stringify(gameFields.imagenesHablar || []),
-                    });
-                    break;
-
-                case 'COMPLETAR':
-                    gameFieldsData.push({
-                        tipoCampo: 'elegir_respuesta',
-                        titulo: 'Completar',
-                        consigna: gameFields.textoIncompletoCompletar || '',
-                        rptaValida: JSON.stringify(gameFields.opcionesCompletar || []),
-                        opciones: JSON.stringify(gameFields.imagenesCompletar || []),
+                        imagenConsigna: gameFields.imagenConsigna || null,
                     });
                     break;
 
@@ -164,6 +133,7 @@ export default function Juegos() {
                         consigna: gameFields.consignaOrden || '',
                         rptaValida: JSON.stringify(gameFields.palabrasOrdenadas || []),
                         opciones: JSON.stringify(gameFields.imagenesOrden || []),
+                        imagenConsigna: gameFields.imagenConsigna || null,
                     });
                     break;
             }
@@ -171,7 +141,7 @@ export default function Juegos() {
             // Create FormData to handle file uploads
             const formDataToSend = new FormData();
 
-            // Add game data
+            // Add game data - This needs to be stringified
             formDataToSend.append('gameData', JSON.stringify({
                 titulo: formData.titulo,
                 rama: formData.rama,
@@ -187,17 +157,24 @@ export default function Juegos() {
             }));
 
             // Add all images
-            if (gameFields.imagenRoles) formDataToSend.append('imagenRoles', gameFields.imagenRoles);
-            if (gameFields.imagenEmociones) formDataToSend.append('imagenEmociones', gameFields.imagenEmociones);
-            if (gameFields.imagenRepetir) formDataToSend.append('imagenRepetir', gameFields.imagenRepetir);
+            if (gameFields.imagenConsigna) {
+                formDataToSend.append('imagenConsigna', gameFields.imagenConsigna);
+            }
+            if (gameFields.imagenRepetir && gameFields.imagenRepetir !== '') formDataToSend.append('imagenRepetir', gameFields.imagenRepetir);
+
+            // Add option images for CONSIGNA
+            if (formData.tipoJuego === 'ROLES') {
+                gameFields.opciones?.forEach((option, index) => {
+                    if (option.urlImg) {
+                        formDataToSend.append(`opciones_${index}`, option.urlImg);
+                    }
+                });
+            }
+
+            // Add other game type images
             if (gameFields.imagenesHablar) {
                 gameFields.imagenesHablar.forEach((img, index) => {
                     formDataToSend.append(`imagenesHablar_${index}`, img);
-                });
-            }
-            if (gameFields.imagenesCompletar) {
-                gameFields.imagenesCompletar.forEach((img, index) => {
-                    formDataToSend.append(`imagenesCompletar_${index}`, img);
                 });
             }
             if (gameFields.imagenesOrden) {
@@ -242,22 +219,35 @@ export default function Juegos() {
         }
     };
 
-    // Helper function to upload images
-    const uploadImage = async (file: File): Promise<string> => {
-        const formData = new FormData();
-        formData.append('file', file);
+    const handleOpenBiblioteca = (field: string) => {
+        setCurrentImageField(field);
+        setShowBiblioteca(true);
+    };
 
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
+    const handleSelectImage = (imagePath: string) => {
+        setGameFields(prev => {
+            if (currentImageField.includes('[]')) {
+                const fieldName = currentImageField.replace('[]', '');
+                return {
+                    ...prev,
+                    [fieldName]: [...(prev[fieldName as keyof GameFields] as string[] || []), imagePath]
+                };
+            } else if (currentImageField.includes('_')) {
+                // Handle option images
+                const [field, index] = currentImageField.split('_');
+                const options = [...(prev[field as keyof GameFields] as Option[] || [])];
+                options[parseInt(index)] = {
+                    ...options[parseInt(index)],
+                    urlImg: imagePath
+                };
+                return { ...prev, [field]: options };
+            } else {
+                return {
+                    ...prev,
+                    [currentImageField]: imagePath
+                };
+            }
         });
-
-        if (!response.ok) {
-            throw new Error('Error al subir la imagen');
-        }
-
-        const data = await response.json();
-        return data.url;
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -268,27 +258,15 @@ export default function Juegos() {
         }));
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-        const files = e.target.files;
-        if (files) {
-            if (field.includes('[]')) {
-                setGameFields(prev => ({
-                    ...prev,
-                    [field.replace('[]', '')]: Array.from(files)
-                }));
-            } else {
-                setGameFields(prev => ({
-                    ...prev,
-                    [field]: files[0]
-                }));
-            }
-        }
-    };
-
-    const handleOptionChange = (index: number, field: string, value: string, isCorrect?: boolean) => {
+    const handleOptionChange = (index: number, field: string, value: string, isCorrect?: boolean, urlImg?: string) => {
         setGameFields(prev => {
             const options = [...(prev[field as keyof GameFields] as Option[] || [])];
-            options[index] = { ...options[index], text: value, isCorrect: isCorrect ?? options[index]?.isCorrect };
+            options[index] = {
+                ...options[index],
+                text: value,
+                isCorrect: isCorrect ?? options[index]?.isCorrect,
+                urlImg: urlImg ?? options[index]?.urlImg
+            };
             return { ...prev, [field]: options };
         });
     };
@@ -308,77 +286,36 @@ export default function Juegos() {
     };
 
     const renderGameTypeFields = () => {
+        // Función común para renderizar el selector de imagen de consigna
+        const renderImagenConsigna = () => (
+            <div>
+                <label className="block text-sm font-medium mb-2">
+                    Imagen de Consigna (opcional)
+                </label>
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={() => handleOpenBiblioteca('imagenConsigna')}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Seleccionar Imagen
+                    </button>
+                    {gameFields.imagenConsigna && (
+                        <div className="relative w-20 h-20">
+                            <Image
+                                src={gameFields.imagenConsigna}
+                                alt="Imagen seleccionada"
+                                fill
+                                className="object-contain"
+                            />
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+
         switch (formData.tipoJuego) {
             case 'ROLES':
-                return (
-                    <>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Pregunta Principal
-                            </label>
-                            <input
-                                type="text"
-                                value={gameFields.preguntaPrincipal || ''}
-                                onChange={(e) => setGameFields(prev => ({ ...prev, preguntaPrincipal: e.target.value }))}
-                                className="w-full p-2 border rounded-md"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Imagen (opcional)
-                            </label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleFileChange(e, 'imagenRoles')}
-                                className="w-full p-2 border rounded-md"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Opciones
-                            </label>
-                            {gameFields.opcionesRoles?.map((option, index) => (
-                                <div key={index} className="flex gap-2 mb-2">
-                                    <input
-                                        type="text"
-                                        value={option.text}
-                                        onChange={(e) => handleOptionChange(index, 'opcionesRoles', e.target.value)}
-                                        className="flex-1 p-2 border rounded-md"
-                                        placeholder="Opción"
-                                        required
-                                    />
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={option.isCorrect}
-                                            onChange={(e) => handleOptionChange(index, 'opcionesRoles', option.text, e.target.checked)}
-                                            className="mr-2"
-                                        />
-                                        Correcta
-                                    </label>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeOption('opcionesRoles', index)}
-                                        className="px-2 py-1 bg-red-500 text-white rounded"
-                                    >
-                                        X
-                                    </button>
-                                </div>
-                            ))}
-                            <button
-                                type="button"
-                                onClick={() => addOption('opcionesRoles')}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-                            >
-                                Agregar Opción
-                            </button>
-                        </div>
-                    </>
-                );
-
-            case 'EMOCIONES':
                 return (
                     <>
                         <div>
@@ -386,63 +323,72 @@ export default function Juegos() {
                                 Consigna
                             </label>
                             <textarea
-                                value={gameFields.consignaEmociones || ''}
-                                onChange={(e) => setGameFields(prev => ({ ...prev, consignaEmociones: e.target.value }))}
+                                value={gameFields.consigna || ''}
+                                onChange={(e) => setGameFields(prev => ({ ...prev, consigna: e.target.value }))}
                                 className="w-full p-2 border rounded-md"
                                 rows={3}
                                 required
                             />
                         </div>
+                        {renderImagenConsigna()}
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                Imagen de Consigna
+                                Respuestas
                             </label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleFileChange(e, 'imagenEmociones')}
-                                className="w-full p-2 border rounded-md"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Opciones (múltiples correctas)
-                            </label>
-                            {gameFields.opcionesEmociones?.map((option, index) => (
+                            {gameFields.opciones?.map((option, index) => (
                                 <div key={index} className="flex gap-2 mb-2">
-                                    <input
-                                        type="text"
-                                        value={option.text}
-                                        onChange={(e) => handleOptionChange(index, 'opcionesEmociones', e.target.value)}
-                                        className="flex-1 p-2 border rounded-md"
-                                        placeholder="Opción"
-                                        required
-                                    />
+                                    <div className="flex-1 flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={option.text}
+                                            onChange={(e) => handleOptionChange(index, 'opciones', e.target.value)}
+                                            className="flex-1 p-2 border rounded-md"
+                                            placeholder="Respuesta"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleOpenBiblioteca(`opciones_${index}`)}
+                                            className="p-2 text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
+                                            title="Seleccionar imagen"
+                                        >
+                                            <ImageIcon size={20} />
+                                        </button>
+                                    </div>
                                     <label className="flex items-center">
                                         <input
                                             type="checkbox"
                                             checked={option.isCorrect}
-                                            onChange={(e) => handleOptionChange(index, 'opcionesEmociones', option.text, e.target.checked)}
+                                            onChange={(e) => handleOptionChange(index, 'opciones', option.text, e.target.checked)}
                                             className="mr-2"
                                         />
                                         Correcta
                                     </label>
                                     <button
                                         type="button"
-                                        onClick={() => removeOption('opcionesEmociones', index)}
+                                        onClick={() => removeOption('opciones', index)}
                                         className="px-2 py-1 bg-red-500 text-white rounded"
                                     >
                                         X
                                     </button>
+                                    {option.urlImg && (
+                                        <div className="relative w-8 h-8">
+                                            <Image
+                                                src={option.urlImg}
+                                                alt="Imagen de respuesta"
+                                                fill
+                                                className="object-contain rounded-md"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                             <button
                                 type="button"
-                                onClick={() => addOption('opcionesEmociones')}
+                                onClick={() => addOption('opciones')}
                                 className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
                             >
-                                Agregar Opción
+                                Agregar Respuesta
                             </button>
                         </div>
                     </>
@@ -463,17 +409,7 @@ export default function Juegos() {
                                 required
                             />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Imagen (opcional)
-                            </label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleFileChange(e, 'imagenRepetir')}
-                                className="w-full p-2 border rounded-md"
-                            />
-                        </div>
+                        {renderImagenConsigna()}
                     </>
                 );
 
@@ -484,13 +420,27 @@ export default function Juegos() {
                             <label className="block text-sm font-medium mb-2">
                                 Imágenes (opcional)
                             </label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={(e) => handleFileChange(e, 'imagenesHablar[]')}
-                                className="w-full p-2 border rounded-md"
-                            />
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleOpenBiblioteca('imagenesHablar[]')}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                >
+                                    Seleccionar Imágenes
+                                </button>
+                                <div className="flex gap-2 flex-wrap">
+                                    {gameFields.imagenesHablar?.map((image, index) => (
+                                        <div key={index} className="relative w-20 h-20">
+                                            <Image
+                                                src={image}
+                                                alt={`Imagen ${index + 1}`}
+                                                fill
+                                                className="object-contain"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-2">
@@ -531,106 +481,35 @@ export default function Juegos() {
                     </>
                 );
 
-            case 'COMPLETAR':
-                return (
-                    <>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Imágenes (opcional)
-                            </label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={(e) => handleFileChange(e, 'imagenesCompletar[]')}
-                                className="w-full p-2 border rounded-md"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Texto Completo
-                            </label>
-                            <textarea
-                                value={gameFields.textoCompletoCompletar || ''}
-                                onChange={(e) => setGameFields(prev => ({ ...prev, textoCompletoCompletar: e.target.value }))}
-                                className="w-full p-2 border rounded-md"
-                                rows={3}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Texto Sin Completar
-                            </label>
-                            <textarea
-                                value={gameFields.textoIncompletoCompletar || ''}
-                                onChange={(e) => setGameFields(prev => ({ ...prev, textoIncompletoCompletar: e.target.value }))}
-                                className="w-full p-2 border rounded-md"
-                                rows={3}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Opciones para Completar
-                            </label>
-                            {gameFields.opcionesCompletar?.map((option, index) => (
-                                <div key={index} className="flex gap-2 mb-2">
-                                    <input
-                                        type="text"
-                                        value={option}
-                                        onChange={(e) => {
-                                            const newOptions = [...(gameFields.opcionesCompletar || [])];
-                                            newOptions[index] = e.target.value;
-                                            setGameFields(prev => ({ ...prev, opcionesCompletar: newOptions }));
-                                        }}
-                                        className="flex-1 p-2 border rounded-md"
-                                        placeholder="Opción"
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            const newOptions = gameFields.opcionesCompletar?.filter((_, i) => i !== index);
-                                            setGameFields(prev => ({ ...prev, opcionesCompletar: newOptions }));
-                                        }}
-                                        className="px-2 py-1 bg-red-500 text-white rounded"
-                                    >
-                                        X
-                                    </button>
-                                </div>
-                            ))}
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setGameFields(prev => ({
-                                        ...prev,
-                                        opcionesCompletar: [...(prev.opcionesCompletar || []), '']
-                                    }));
-                                }}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-                            >
-                                Agregar Opción
-                            </button>
-                        </div>
-                    </>
-                );
-
             case 'ORDEN':
                 return (
                     <>
+                        {renderImagenConsigna()}
                         <div>
                             <label className="block text-sm font-medium mb-2">
                                 Imágenes
                             </label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={(e) => handleFileChange(e, 'imagenesOrden[]')}
-                                className="w-full p-2 border rounded-md"
-                                required
-                            />
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleOpenBiblioteca('imagenesOrden[]')}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                >
+                                    Seleccionar Imágenes
+                                </button>
+                                <div className="flex gap-2 flex-wrap">
+                                    {gameFields.imagenesOrden?.map((image, index) => (
+                                        <div key={index} className="relative w-20 h-20">
+                                            <Image
+                                                src={image}
+                                                alt={`Imagen ${index + 1}`}
+                                                fill
+                                                className="object-contain"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-2">
@@ -812,11 +691,9 @@ export default function Juegos() {
                             className="w-full p-2 border rounded-md"
                             required
                         >
-                            <option value="ROLES">Roles</option>
-                            <option value="EMOCIONES">Emociones</option>
+                            <option value="ROLES">Consigna Rpta</option>
                             <option value="REPETIR">Repetir</option>
                             <option value="HABLAR">Hablar</option>
-                            <option value="COMPLETAR">Completar</option>
                             <option value="ORDEN">Orden</option>
                         </select>
                     </div>
@@ -862,7 +739,38 @@ export default function Juegos() {
                     isOpen={showPreview}
                     onClose={() => setShowPreview(false)}
                     gameType={formData.tipoJuego}
-                    gameData={gameFields}
+                    gameData={
+                        formData.tipoJuego === 'ROLES' ? {
+                            tipo_juego: 'select',
+                            url_imagen: gameFields.imagenConsigna,
+                            consigna: gameFields.consigna || '',
+                            respuestas: gameFields.opciones?.map(opt => ({
+                                texto: opt.text,
+                                esCorrecta: opt.isCorrect,
+                                urlImg: opt.urlImg
+                            })) || [],
+                            onRespuestaSeleccionada: () => { }
+                        } : formData.tipoJuego === 'REPETIR' ? {
+                            imagenRepetir: gameFields.imagenRepetir,
+                            textoRepetir: gameFields.textoRepetir
+                        } : formData.tipoJuego === 'HABLAR' ? {
+                            imagenesHablar: gameFields.imagenesHablar || [],
+                            consignaEmociones: gameFields.textoIncompleto || '',
+                            textoCompleto: gameFields.textoCompleto || '',
+                            textoIncompleto: gameFields.textoIncompleto || '',
+                            palabraCompletar: gameFields.palabraCompletar || ''
+                        } : formData.tipoJuego === 'ORDEN' ? {
+                            imagenesOrden: gameFields.imagenesOrden || [],
+                            palabrasOrdenadas: gameFields.palabrasOrdenadas || [],
+                            consignaOrden: gameFields.consignaOrden || ''
+                        } : undefined
+                    }
+                />
+
+                <BibliotecaImagen
+                    isOpen={showBiblioteca}
+                    onClose={() => setShowBiblioteca(false)}
+                    onSelectImage={handleSelectImage}
                 />
             </div>
         </div>
