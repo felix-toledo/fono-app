@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import useSound from 'use-sound';
 import { useGameSound } from '@/contexts/SoundContext';
+import { FeedbackMessage } from './FeedbackMessage';
 
 interface Respuesta {
     esCorrecta: boolean;
@@ -17,74 +18,6 @@ interface GameQuestionProps {
     respuestas: Respuesta[];
     onRespuestaSeleccionada: (esCorrecta: boolean) => void;
 }
-
-const FeedbackMessage = ({ esCorrecta }: { esCorrecta: boolean }) => {
-    return (
-        <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className="fixed inset-0 flex items-center justify-center z-50 bg-black/50"
-        >
-            <motion.div
-                className="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-md mx-4"
-                initial={{ y: 50 }}
-                animate={{ y: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-                <motion.div
-                    className="text-6xl mb-4"
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 10, -10, 0]
-                    }}
-                    transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        repeatType: "reverse"
-                    }}
-                >
-                    {esCorrecta ? "🎉" : "💫"}
-                </motion.div>
-                <motion.h2
-                    className="text-3xl font-bold mb-4"
-                    animate={{
-                        color: esCorrecta ? ["#99d4f2", "#fec0bb", "#99d4f2"] : ["#fec0bb", "#99d4f2", "#fec0bb"]
-                    }}
-                    transition={{
-                        duration: 2,
-                        repeat: Infinity
-                    }}
-                >
-                    {esCorrecta ? "¡Excelente!" : "¡Casi lo logras!"}
-                </motion.h2>
-                <motion.p
-                    className="text-xl mb-6"
-                    animate={{
-                        y: [0, -5, 0]
-                    }}
-                    transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
-                >
-                    {esCorrecta
-                        ? "¡Sigue así, lo estás haciendo genial!"
-                        : "No te rindas, ¡inténtalo de nuevo!"}
-                </motion.p>
-                <motion.button
-                    className="bg-[#99d4f2] text-white px-6 py-3 rounded-full text-lg font-bold hover:bg-[#fec0bb] transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => window.location.reload()}
-                >
-                    ¡Jugar de nuevo!
-                </motion.button>
-            </motion.div>
-        </motion.div>
-    );
-};
 
 const GameQuestion = ({
     tipo_juego,
@@ -177,7 +110,9 @@ const GameQuestion = ({
         }
     };
 
-    console.log(url_imagen);
+    const handleFeedbackClose = () => {
+        setShowBigFeedback(false);
+    };
 
     return (
         <>
@@ -289,6 +224,7 @@ const GameQuestion = ({
                 {showBigFeedback && (
                     <FeedbackMessage
                         esCorrecta={selectedAnswers.every(index => respuestas[index].esCorrecta)}
+                        onClose={handleFeedbackClose}
                     />
                 )}
             </AnimatePresence>

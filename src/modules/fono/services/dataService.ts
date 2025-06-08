@@ -34,7 +34,6 @@ export const obtenerEstadisticas = async (fonoId: number) => {
     }
 
     const response = await fetch(`/api/fono/statistics?fonoId=${fonoId}`);
-    console.log(response)
     if (!response.ok) {
         throw new Error('Failed to fetch statistics');
     }

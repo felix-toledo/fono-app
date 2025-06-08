@@ -61,7 +61,6 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        console.log('Datos recibidos:', body);
 
         const { pacienteId, fecha, horario, tipo, notas, fonoId } = body;
 
@@ -91,7 +90,6 @@ export async function POST(request: Request) {
 
         // Combinar fecha y horario
         const fechaCompleta = parse(`${fecha} ${horario}`, 'dd/MM/yyyy HH:mm', new Date());
-        console.log('Fecha completa:', fechaCompleta);
 
         // Verificar si ya existe un turno en ese horario
         const turnoExistente = await prisma.turno.findFirst({
@@ -124,7 +122,6 @@ export async function POST(request: Request) {
             }
         });
 
-        console.log('Turno creado:', turno);
 
         return NextResponse.json({
             id: Number(turno.id),

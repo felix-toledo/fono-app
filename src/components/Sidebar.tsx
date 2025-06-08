@@ -66,7 +66,6 @@ export const Sidebar = () => {
     const isFono = userInfo?.perfil === 'FONO';
     const isPaciente = userInfo?.perfil === 'PACIENTE';
 
-    console.log(userInfo);
 
     return (
         <>

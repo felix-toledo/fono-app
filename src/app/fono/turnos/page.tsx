@@ -81,7 +81,6 @@ const Turnos = () => {
             setError(null);
             const fechaFormateada = format(fecha, 'dd/MM/yyyy');
             const fonoId = getFonoId();
-            console.log('Cargando turnos para fecha:', fechaFormateada, 'fonoId:', fonoId);
 
             const response = await fetch(`/api/fono/turnos?fecha=${fechaFormateada}&fonoId=${fonoId}`);
 
@@ -91,7 +90,6 @@ const Turnos = () => {
             }
 
             const data = await response.json();
-            console.log('Turnos cargados:', data);
             setTurnosDelDia(data);
         } catch (error) {
             console.error('Error al cargar turnos:', error);
@@ -195,7 +193,6 @@ const Turnos = () => {
     // Modificar el handleSubmit para manejar tanto la creación como la edición
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Iniciando operación de turno...');
 
         if (!selectedDate || !selectedSlot || !nuevoPaciente) {
             toast.error('Por favor completa todos los campos requeridos');
@@ -245,7 +242,6 @@ const Turnos = () => {
             });
 
             const responseData = await response.json();
-            console.log('Respuesta del servidor:', responseData);
 
             if (!response.ok) {
                 throw new Error(responseData.error || `Error al ${turnoEditando ? 'actualizar' : 'crear'} el turno`);

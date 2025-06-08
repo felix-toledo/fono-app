@@ -15,7 +15,6 @@ export async function GET(request: Request) {
         }
 
         const { userId } = JSON.parse(sessionData);
-        console.log('Fetching profile for userId:', userId); // Added for debugging
 
         // Get user data using the existing service
         const userData = await prisma.$queryRaw<any[]>`
@@ -69,9 +68,7 @@ export async function PUT(request: Request) {
         }
 
         const { userId } = JSON.parse(sessionData);
-        console.log('Updating profile for userId:', userId); // Added for debugging
         const body = await request.json();
-        console.log('Update data:', body); // Added for debugging
 
         // First get the user to find the related Persona and Fonoaudiologo IDs
         const user = await prisma.usuario.findUnique({

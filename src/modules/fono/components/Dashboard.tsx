@@ -44,13 +44,10 @@ export default function Dashboard() {
                 const parsedData = JSON.parse(sessionData);
                 if (parsedData.perfil === 'FONO') {
                     setUserInfo(parsedData);
-                    console.log(parsedData);
                 } else {
-                    console.log('No es fono');
                     router.push('/login');
                 }
             } else {
-                console.log('No hay session');
                 router.push('/login');
             }
         }

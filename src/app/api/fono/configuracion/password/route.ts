@@ -15,10 +15,8 @@ export async function PUT(request: Request) {
         }
 
         const { userId } = JSON.parse(sessionData);
-        console.log('Changing password for userId:', userId); // Debug log
 
         const { currentPassword, newPassword } = await request.json();
-        console.log('Received password change request'); // Debug log
 
         // Get user with password
         const user = await prisma.usuario.findUnique({
@@ -50,7 +48,6 @@ export async function PUT(request: Request) {
 
         // Hash new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        console.log('New password hashed successfully'); // Debug log
 
         // Update password
         const updatedUser = await prisma.usuario.update({
@@ -58,7 +55,6 @@ export async function PUT(request: Request) {
             data: { passwordHash: hashedPassword }
         });
 
-        console.log('Password updated successfully for user:', updatedUser.id); // Debug log
 
         return NextResponse.json({ message: 'Contraseña actualizada correctamente' });
     } catch (error) {

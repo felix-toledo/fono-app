@@ -176,7 +176,6 @@ const Configuracion = () => {
                 return;
             }
 
-            console.log('Sending password change request...'); // Debug log
             const response = await axios.put('/api/fono/configuracion/password', {
                 currentPassword: passwordChange.currentPassword,
                 newPassword: passwordChange.newPassword
@@ -185,7 +184,6 @@ const Configuracion = () => {
                     'x-session-data': JSON.stringify({ userId: getFonoId() })
                 }
             });
-            console.log('Password change response:', response.data); // Debug log
 
             toast.success('Contraseña actualizada correctamente');
             setShowPasswordChange(false);

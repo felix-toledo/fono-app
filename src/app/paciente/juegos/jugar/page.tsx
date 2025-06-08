@@ -55,13 +55,10 @@ export default function Jugar() {
                 }
 
                 // Fetch filtered games
-                console.log('pacienteId', pacienteId)
                 const response = await fetch(`/api/paciente/juegos/filtrados?pacienteId=${pacienteId}`);
                 const data = await response.json();
 
                 if (data.success) {
-                    console.log('Filtros aplicados:', data.filtros);
-                    console.log('Juegos filtrados:', data.juegos);
                     setJuegos(data.juegos);
                     setFiltros(data.filtros);
                 } else {
@@ -82,14 +79,31 @@ export default function Jugar() {
         const campoJuego = juego.juegoCampoJs[0]?.campoJuego;
         if (!campoJuego) return null;
 
-        console.log('Preparando datos para juego:', juego.tipoJuego);
-        console.log('Campo Juego:', campoJuego);
 
         // Mapear según el tipo de juego
         switch (juego.tipoJuego) {
-            case 'REPETIR':
+            case 'ROLES':
+                const opciones = campoJuego.opciones ? JSON.parse(campoJuego.opciones) : [];
+                const respuestaValida = campoJuego.rptaValida ? JSON.parse(campoJuego.rptaValida) : [];
+
+
                 return {
-                    textoRepetir: campoJuego.rptaValida,
+                    preguntaPrincipal: campoJuego.consigna,
+                    opcionesRoles: opciones.map((opt: any) => ({
+                        text: opt.text,
+                        isCorrect: respuestaValida.includes(opt.text),
+                        urlImg: opt.urlImg
+                    })),
+                    imagenRoles: campoJuego.imagenConsigna ? JSON.parse(campoJuego.imagenConsigna).url : null
+                };
+
+            case 'REPETIR':
+                const textoRepetir = campoJuego.rptaValida ?
+                    (typeof campoJuego.rptaValida === 'string' && campoJuego.rptaValida.startsWith('{') ?
+                        JSON.parse(campoJuego.rptaValida).texto :
+                        campoJuego.rptaValida) : '';
+                return {
+                    textoRepetir,
                     consignaEmociones: campoJuego.consigna,
                     imagenRepetir: campoJuego.imagenConsigna ? JSON.parse(campoJuego.imagenConsigna).url : null
                 };
@@ -100,14 +114,14 @@ export default function Jugar() {
                     textoIncompleto: campoJuego.consigna,
                     palabraCompletar: campoJuego.rptaValida,
                     consignaEmociones: campoJuego.consigna,
-                    imagenesHablar: campoJuego.imagenConsigna ? [JSON.parse(campoJuego.imagenConsigna).url] : []
+                    imagenesHablar: campoJuego.opciones ? JSON.parse(campoJuego.opciones) : []
                 };
 
             case 'ORDEN':
                 return {
-                    palabrasOrdenadas: campoJuego.opciones ? JSON.parse(campoJuego.opciones) : [],
+                    palabrasOrdenadas: campoJuego.rptaValida ? JSON.parse(campoJuego.rptaValida) : [],
                     consignaOrden: campoJuego.consigna,
-                    imagenesOrden: campoJuego.imagenConsigna ? [JSON.parse(campoJuego.imagenConsigna).url] : []
+                    imagenesOrden: campoJuego.opciones ? JSON.parse(campoJuego.opciones) : []
                 };
 
             case 'COMPLETAR':
@@ -116,21 +130,6 @@ export default function Jugar() {
                     textoIncompletoCompletar: campoJuego.consigna,
                     opcionesCompletar: campoJuego.opciones ? JSON.parse(campoJuego.opciones) : [],
                     imagenesCompletar: campoJuego.imagenConsigna ? [JSON.parse(campoJuego.imagenConsigna).url] : []
-                };
-
-            case 'ROLES':
-                const opciones = campoJuego.opciones ? JSON.parse(campoJuego.opciones) : [];
-                const respuestaValida = campoJuego.rptaValida ? JSON.parse(campoJuego.rptaValida) : [];
-                console.log('Opciones parseadas:', opciones);
-                console.log('Respuesta válida parseada:', respuestaValida);
-
-                return {
-                    preguntaPrincipal: campoJuego.consigna,
-                    opcionesRoles: opciones.map((opt: string) => ({
-                        text: opt,
-                        isCorrect: respuestaValida.includes(opt)
-                    })),
-                    imagenRoles: campoJuego.imagenConsigna ? JSON.parse(campoJuego.imagenConsigna).url : null
                 };
 
             case 'EMOCIONES':
@@ -155,6 +154,9 @@ export default function Jugar() {
     const handleGameComplete = async (estado: 'GANADO' | 'PERDIDO' | 'ERROR', expGanada?: string) => {
         if (!juegoActual) return;
 
+        console.log('Estado recibido en handleGameComplete:', estado);
+        console.log('Tipo de juego:', juegoActual.tipoJuego);
+
         try {
             const pacienteId = getPacienteId();
             if (!pacienteId) {
@@ -172,26 +174,40 @@ export default function Jugar() {
                     pacienteId,
                     juegoId: juegoActual.id,
                     expGanada,
-                    estado
+                    estado // Asegurarnos de que este es el estado correcto
                 })
             });
 
             const data = await response.json();
             if (!data.success) {
                 console.error('Error al guardar la instancia:', data.error);
+                return;
             }
 
-            // Move to next game if available
-            const nextIndex = juegoActualIndex + 1;
-            if (nextIndex < juegos.length) {
-                setJuegoActualIndex(nextIndex);
-                setJuegoActual(juegos[nextIndex]);
-                setGameCompleted(false);
-            } else {
-                // All games completed
-                setShowStartButton(true);
-                setJuegoActual(null);
-                setJuegoActualIndex(0);
+            console.log('Respuesta de la API:', data);
+
+            // Esperar 5 segundos antes de pasar al siguiente juego
+            await new Promise(resolve => setTimeout(resolve, 5000));
+
+            // Para juegos de tipo REPETIR, HABLAR, y ORDEN, siempre pasar al siguiente juego
+            if (
+                juegoActual.tipoJuego === 'REPETIR' ||
+                juegoActual.tipoJuego === 'HABLAR' ||
+                juegoActual.tipoJuego === 'ORDEN' ||
+                juegoActual.tipoJuego === 'COMPLETAR' ||
+                juegoActual.tipoJuego === 'EMOCIONES' ||
+                juegoActual.tipoJuego === 'ROLES'
+            ) {
+                const nextIndex = juegoActualIndex + 1;
+                if (nextIndex < juegos.length) {
+                    setJuegoActualIndex(nextIndex);
+                    setJuegoActual(juegos[nextIndex]);
+                    setGameCompleted(false);
+                } else {
+                    setShowStartButton(true);
+                    setJuegoActual(null);
+                    setJuegoActualIndex(0);
+                }
             }
         } catch (error) {
             console.error('Error:', error);
@@ -206,16 +222,16 @@ export default function Jugar() {
 
         switch (juegoActual.tipoJuego) {
             case 'ROLES':
-            case 'EMOCIONES':
                 return (
                     <GameQuestion
                         tipo_juego="select"
-                        url_imagen={gameData.imagenRoles || gameData.imagenEmociones || '/placeholder.jpg'}
-                        consigna={gameData.preguntaPrincipal || gameData.consignaEmociones || ''}
-                        respuestas={(gameData.opcionesRoles || gameData.opcionesEmociones || []).map((opt: any) => ({
-                            texto: opt.text || opt,
-                            esCorrecta: opt.isCorrect || false
-                        }))}
+                        url_imagen={gameData.imagenRoles || '/placeholder.jpg'}
+                        consigna={gameData.preguntaPrincipal || ''}
+                        respuestas={gameData.opcionesRoles?.map((opt: any) => ({
+                            texto: opt.text,
+                            esCorrecta: opt.isCorrect,
+                            urlImg: opt.urlImg
+                        })) || []}
                         onRespuestaSeleccionada={(esCorrecta) => {
                             handleGameComplete(
                                 esCorrecta ? 'GANADO' : 'PERDIDO',
@@ -226,20 +242,38 @@ export default function Jugar() {
                 );
 
             case 'REPETIR':
+                return (
+                    <FotosHabla
+                        imagenes={gameData.imagenRepetir ? [gameData.imagenRepetir] : []}
+                        consigna={gameData.consignaEmociones || ''}
+                        textoCompleto={gameData.textoRepetir || ''}
+                        textoSinCompletar={gameData.textoRepetir || ''}
+                        palabraACompletar={gameData.textoRepetir || ''}
+                        onGameComplete={(estado) => {
+                            handleGameComplete(
+                                estado as 'GANADO' | 'PERDIDO' | 'ERROR',
+                                estado === 'GANADO' ? juegoActual.experienciaDada : undefined
+                            );
+                        }}
+                        allowRetry={false}
+                    />
+                );
+
             case 'HABLAR':
                 return (
                     <FotosHabla
-                        imagenes={gameData.imagenRepetir ? [gameData.imagenRepetir] : gameData.imagenesHablar || []}
+                        imagenes={gameData.imagenesHablar || []}
                         consigna={gameData.consignaEmociones || ''}
-                        textoCompleto={gameData.textoCompleto || gameData.textoRepetir || ''}
-                        textoSinCompletar={gameData.textoIncompleto || gameData.textoRepetir || ''}
-                        palabraACompletar={gameData.palabraCompletar || gameData.textoRepetir || ''}
-                        onGameComplete={(esCorrecta) => {
+                        textoCompleto={gameData.textoCompleto || ''}
+                        textoSinCompletar={gameData.textoIncompleto || ''}
+                        palabraACompletar={gameData.palabraCompletar || ''}
+                        onGameComplete={(estado) => {
                             handleGameComplete(
-                                esCorrecta ? 'GANADO' : 'PERDIDO',
-                                esCorrecta ? juegoActual.experienciaDada : undefined
+                                estado as 'GANADO' | 'PERDIDO' | 'ERROR',
+                                estado === 'GANADO' ? juegoActual.experienciaDada : undefined
                             );
                         }}
+                        allowRetry={false}
                     />
                 );
 

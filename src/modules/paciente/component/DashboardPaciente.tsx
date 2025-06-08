@@ -25,13 +25,10 @@ export default function DashboardPaciente() {
                 setEdad(edad);
                 if (parsedData.perfil === 'PACIENTE') {
                     setUserInfo(parsedData);
-                    console.log(parsedData);
                 } else {
-                    console.log('No es paciente');
                     router.push('/login');
                 }
             } else {
-                console.log('No hay session paciente');
                 router.push('/login');
             }
         }
