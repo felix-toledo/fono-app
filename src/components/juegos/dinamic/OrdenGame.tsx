@@ -164,28 +164,30 @@ const OrdenGame: React.FC<OrdenGameProps> = ({
                     {consigna}
                 </motion.h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className={`grid ${imagenes.length > 0 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-8`}>
                     {/* Imágenes */}
-                    <div className="space-y-6">
-                        {imagenes.map((img, index) => (
-                            <motion.div
-                                key={index}
-                                className="relative w-full h-48 rounded-lg overflow-hidden bg-[#99d4f2]/10"
-                                whileHover={{ scale: 1.05, rotate: 2 }}
-                                transition={{ type: "spring", stiffness: 300 }}
-                            >
-                                <Image
-                                    src={img}
-                                    alt={`Imagen ${index + 1}`}
-                                    fill
-                                    className="object-contain p-4"
-                                />
-                            </motion.div>
-                        ))}
-                    </div>
+                    {imagenes.length > 0 && (
+                        <div className="space-y-6">
+                            {imagenes.map((img, index) => (
+                                <motion.div
+                                    key={index}
+                                    className="relative w-full h-48 rounded-lg overflow-hidden bg-[#99d4f2]/10"
+                                    whileHover={{ scale: 1.05, rotate: 2 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                    <Image
+                                        src={img}
+                                        alt={`Imagen ${index + 1}`}
+                                        fill
+                                        className="object-contain p-4"
+                                    />
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Palabras seleccionables */}
-                    <div className="space-y-6">
+                    <div className={`space-y-6 ${imagenes.length === 0 ? 'max-w-2xl mx-auto w-full' : ''}`}>
                         <motion.div
                             className="text-center mb-6 bg-[#fec0bb]/10 p-4 rounded-lg"
                             animate={{

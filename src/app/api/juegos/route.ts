@@ -2,11 +2,17 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
+import { Prisma } from '@prisma/client';
 
 export async function POST(request: Request) {
     try {
         const formData = await request.formData();
         const gameData = JSON.parse(formData.get('gameData') as string);
+
+        // Parsear gameFields si es un string
+        if (typeof gameData.gameFields === 'string') {
+            gameData.gameFields = JSON.parse(gameData.gameFields);
+        }
 
         // Create the main game record
         const game = await prisma.juego.create({
@@ -29,14 +35,18 @@ export async function POST(request: Request) {
             // Handle image uploads if present
             let imagenConsigna = null;
             if (fieldData.imagenConsigna) {
-                const imageFile = formData.get(fieldData.imagenConsigna.name) as File;
-                if (imageFile) {
+                const imageFile = formData.get('imagenConsigna');
+                if (imageFile instanceof File) {
+                    // Procesar como archivo
                     const bytes = await imageFile.arrayBuffer();
                     const buffer = Buffer.from(bytes);
                     const fileName = `${Date.now()}-${imageFile.name}`;
                     const path = join(process.cwd(), 'public', 'uploads', fileName);
                     await writeFile(path, buffer);
-                    imagenConsigna = JSON.stringify({ url: `/uploads/${fileName}` });
+                    imagenConsigna = `/uploads/${fileName}`;
+                } else if (typeof imageFile === 'string') {
+                    // Usar la ruta directamente
+                    imagenConsigna = imageFile;
                 }
             }
 
@@ -46,12 +56,12 @@ export async function POST(request: Request) {
 
             if (gameData.tipoJuego === 'ROLES') {
                 // Process options to include images and correct status
-                const options = JSON.parse(fieldData.opciones);
-                const processedOptions = options.map(async (option: any, index: number) => {
-                    const optionImage = formData.get(`opcionesRoles_${index}`) as File;
+                const options = fieldData.opciones || [];
+                const processedOptions = await Promise.all(options.map(async (option: any, index: number) => {
+                    const optionImage = formData.get(`opciones_${index}`) as File;
                     let imageUrl = null;
 
-                    if (optionImage) {
+                    if (optionImage && optionImage instanceof File) {
                         const bytes = await optionImage.arrayBuffer();
                         const buffer = Buffer.from(bytes);
                         const fileName = `${Date.now()}-${optionImage.name}`;
@@ -61,11 +71,11 @@ export async function POST(request: Request) {
                     }
 
                     return {
-                        text: option.text,
-                        isCorrect: option.isCorrect,
-                        urlImg: imageUrl
+                        text: option.text || '',
+                        isCorrect: option.isCorrect || false,
+                        urlImg: imageUrl || option.urlImg || null
                     };
-                });
+                }));
 
                 processedOpciones = JSON.stringify(processedOptions);
                 processedRptaValida = JSON.stringify(
@@ -79,11 +89,11 @@ export async function POST(request: Request) {
             const campoJuego = await prisma.campoJuego.create({
                 data: {
                     tipoCampo: fieldData.tipoCampo,
-                    titulo: fieldData.titulo,
-                    consigna: fieldData.consigna,
-                    rptaValida: processedRptaValida,
-                    opciones: processedOpciones,
-                    imagenConsigna: imagenConsigna || undefined,
+                    titulo: fieldData.titulo || 'Campo de Juego',
+                    consigna: fieldData.consigna || '',
+                    rptaValida: processedRptaValida || '[]',
+                    opciones: processedOpciones || '[]',
+                    imagenConsigna: imagenConsigna ? JSON.stringify({ url: imagenConsigna }) : Prisma.JsonNull,
                     rama: gameData.rama,
                 },
             });
