@@ -72,7 +72,7 @@ export const Sidebar = () => {
             {/* Hamburger button for mobile */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-primary text-white hover:bg-primary/90"
+                className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md text-black/30 hover:bg-primary/40 hover:text-white transition-colors backdrop-blur"
             >
                 <Menu size={24} />
             </button>
