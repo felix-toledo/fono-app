@@ -335,6 +335,15 @@ export default function Jugar() {
         );
     }
 
+    if (!loading && juegos.length === 0) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+                <h1 className="text-2xl font-bold mb-8">¡Ya no hay más juegos disponibles para ti!</h1>
+                <p className="text-lg text-gray-600">Volvé más tarde para seguir</p>
+            </div>
+        );
+    }
+
     if (showStartButton) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
