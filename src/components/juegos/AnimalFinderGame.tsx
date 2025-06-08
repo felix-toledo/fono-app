@@ -114,7 +114,7 @@ export default function AnimalFinderGame() {
     console.log(`Clicked at: ${x.toFixed(1)}%, ${y.toFixed(1)}%`)
 
     // Encontrar el animal más cercano al clic que no haya sido encontrado
-    let closestAnimal: Animal | null = null
+    let closestAnimal = null as Animal | null
     let minDistance = Number.POSITIVE_INFINITY
 
     animals.forEach((animal) => {
@@ -137,13 +137,13 @@ export default function AnimalFinderGame() {
       ) {
         if (distance < minDistance) {
           minDistance = distance
-          closestAnimal = animal
+          closestAnimal = { ...animal }
         }
       }
     })
 
     // Si encontramos un animal cercano, marcarlo como encontrado
-    if (closestAnimal) {
+    if (closestAnimal && 'name' in closestAnimal) {
       setLastFoundAnimal(closestAnimal.name)
       setAnimals((prev) =>
         prev.map((animal) => (animal.id === closestAnimal!.id ? { ...animal, found: true } : animal)),
@@ -206,9 +206,8 @@ export default function AnimalFinderGame() {
           {/* Barra de progreso personalizada */}
           <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
             <div
-              className={`h-full transition-all duration-300 ${
-                timePercentage < 30 ? "bg-red-500" : timePercentage < 60 ? "bg-yellow-500" : "bg-green-500"
-              }`}
+              className={`h-full transition-all duration-300 ${timePercentage < 30 ? "bg-red-500" : timePercentage < 60 ? "bg-yellow-500" : "bg-green-500"
+                }`}
               style={{ width: `${timePercentage}%` }}
             ></div>
           </div>
@@ -237,9 +236,8 @@ export default function AnimalFinderGame() {
             {animals.map((animal) => (
               <div
                 key={animal.id}
-                className={`absolute pointer-events-none transition-all duration-300 rounded-lg ${
-                  showHint ? "bg-yellow-300 bg-opacity-60 border-2 border-yellow-500 animate-pulse" : ""
-                }`}
+                className={`absolute pointer-events-none transition-all duration-300 rounded-lg ${showHint ? "bg-yellow-300 bg-opacity-60 border-2 border-yellow-500 animate-pulse" : ""
+                  }`}
                 style={{
                   left: `${animal.x}%`,
                   top: `${animal.y}%`,
@@ -282,9 +280,8 @@ export default function AnimalFinderGame() {
             {animals.map((animal) => (
               <div
                 key={animal.id}
-                className={`p-2 rounded-lg text-center text-sm transition-all ${
-                  animal.found ? "bg-green-100 text-green-800 line-through" : "bg-gray-100 text-gray-800"
-                }`}
+                className={`p-2 rounded-lg text-center text-sm transition-all ${animal.found ? "bg-green-100 text-green-800 line-through" : "bg-gray-100 text-gray-800"
+                  }`}
               >
                 {animal.found && <CheckCircle className="w-4 h-4 inline mr-1" />}
                 {animal.name}

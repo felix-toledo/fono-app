@@ -12,10 +12,10 @@ export default function FonoLayout({
 }) {
     return (
         <FonoProvider>
-            <div className="flex w-full min-h-screen">
+            <div className="flex min-h-screen bg-gray-50">
                 <Sidebar />
-                <main className="flex-1 flex flex-col overflow-y-auto lg:ml-60 p-4">
-                    <div className="max-w-7xl mx-auto w-full">
+                <main className="w-full flex-1 flex flex-col overflow-y-auto lg:ml-0 p-2">
+                    <div className="w-full mx-auto">
                         {children}
                     </div>
                 </main>

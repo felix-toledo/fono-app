@@ -4,10 +4,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Calendar, Users, FileText, Settings, LogOut, Menu, Gamepad2, User } from 'lucide-react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 // import { format } from 'date-fns';
 // import { es } from 'date-fns/locale';
 import { DatosFono } from '@/modules/fono/types/fonoLocalStorage';
 import { DatosPaciente } from '@/modules/paciente/types/pacienteLocalStorage';
+import { Logo } from '@/components/Logo';
 
 // Function to determine navigation link classes
 const getNavLinkClass = (isActive: boolean) => {
@@ -94,6 +97,9 @@ export const Sidebar = () => {
             `}>
                 <div className="pb-4 mb-4 border-b border-border">
                     <div className="flex flex-col items-center">
+                        <div className="mb-4">
+                            <Logo size="md" />
+                        </div>
                         <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-2 overflow-hidden">
                             {userInfo?.FotoPerfil ? (
                                 <img
@@ -174,10 +180,20 @@ export const Sidebar = () => {
                                 <span>Juegos</span>
                             </Link>
 
-                            <Link href="/paciente/sobre-mi" className={getNavLinkClass(pathname === '/paciente/sobre-mi')}>
+                            <button
+                                onClick={() => toast.info('Esta opción estará disponible próximamente', {
+                                    position: "top-right",
+                                    autoClose: 3000,
+                                    hideProgressBar: false,
+                                    closeOnClick: true,
+                                    pauseOnHover: true,
+                                    draggable: true,
+                                })}
+                                className={getNavLinkClass(pathname === '/paciente/sobre-mi')}
+                            >
                                 <User size={20} className="mr-2" />
                                 <span>Sobre Mí</span>
-                            </Link>
+                            </button>
                         </>
                     ) : null}
 

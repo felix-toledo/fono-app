@@ -229,15 +229,6 @@ export default function FotosHabla({ imagenes, consigna, textoCompleto, textoSin
                     Tu respuesta: <span className="font-bold text-[#99d4f2]">{transcripcion}</span>
                 </motion.div>
             )}
-
-            <div className="mt-8">
-                <button
-                    onClick={handleSubmit}
-                    className="px-6 py-3 bg-[#99d4f2] text-white rounded-full font-bold hover:bg-[#fec0bb] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                    {resultado === 'correcto' ? '¡Correcto! Continuar' : '¡Incorrecto! Intentar de nuevo'}
-                </button>
-            </div>
         </motion.div>
     );
 }

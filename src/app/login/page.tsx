@@ -10,6 +10,7 @@ import { Input } from '@/components/Input';
 import { LogIn, User, Lock } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { TipoUsuario } from '@prisma/client';
+import { Logo } from '@/components/Logo';
 
 export default function Login() {
     const [username, setUsername] = useState('');
@@ -79,6 +80,9 @@ export default function Login() {
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
+                    <div className="flex justify-center mb-4">
+                        <Logo size="lg" />
+                    </div>
                     <h1 className="text-3xl font-bold text-primary">Fonolingo</h1>
                     <p className="text-gray-600 mt-2">Inicia sesión para acceder a la plataforma</p>
                 </div>

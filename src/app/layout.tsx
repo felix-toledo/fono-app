@@ -20,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="h-full">
-      <body className={`${inter.variable} antialiased h-full w-full`}>
+    <html lang="es">
+      <body className={`${inter.variable} antialiased`}>
         {children}
         <ToastContainer
           position="top-right"
