@@ -1,0 +1,369 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoRama {
+  Pragmatica
+  Semantica
+  Fonologia_y_Fonetica
+  Morfosintaxis
+}
+
+enum TipoTrastorno {
+  Expresivos
+  Mixtos
+  Procesamiento_y_Formulacion
+}
+
+enum TipoCampo {
+  elegir_respuesta
+  asociar_imagen
+  escribir_respuesta
+  clasificar_categoria
+  sinonimos
+  antonimos
+  asociar_funcion
+  frase_audio
+  identificar_sonido
+  ordenar_palabras
+  ordenar_dialogos
+}
+
+enum TipoUsuario {
+  ADMIN
+  FONO
+  PACIENTE
+  TUTOR
+}
+
+enum EstadosTurno {
+  PENDIENTE
+  CONFIRMADO
+  CANCELADO
+  REALIZADO
+}
+
+enum EstadoJuego {
+  GANADO
+  PERDIDO
+  ERROR
+}
+
+enum TipoJuego {
+  ROLES
+  EMOCIONES
+  REPETIR
+  HABLAR
+  COMPLETAR
+  ORDEN
+}
+
+enum RangoEdad {
+  TODOS
+  DE_4_A_6
+  DE_7_A_10
+}
+
+model Persona {
+  id        BigInt   @id @default(autoincrement())
+  nombre    String
+  apellido  String
+  dni       Decimal  @unique
+  fechaNac  DateTime
+  direccion String?
+  telefono  Decimal?
+  mail      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  paciente      Paciente?
+  fonoaudiologo Fonoaudiologo?
+  usuario       Usuario?
+}
+
+model Paciente {
+  id           BigInt   @id @default(autoincrement())
+  personaId    BigInt   @unique
+  escolaridad  String?
+  ocupacion    String?
+  obraSocial   String?
+  fechaAlta    DateTime
+  experiencia  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  persona         Persona         @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  fonoPacientes   FonoPaciente[]
+  historiaClinica HistoriaClinica[]
+  instanciaJuegos InstanciaJuego[]
+  turnos          Turno[]
+}
+
+model Fonoaudiologo {
+  id                  BigInt   @id @default(autoincrement())
+  personaId           BigInt   @unique
+  matricula           String?
+  direccionConsultorio String?
+  fechaAlta           DateTime
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  persona         Persona         @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  fonoPacientes   FonoPaciente[]
+  fonoHistorias   FonoHistoria[]
+  evoluciones     EvolucionFono[]
+  turnos          Turno[]
+}
+
+model FonoPaciente {
+  id               BigInt   @id @default(autoincrement())
+  pacienteId       BigInt
+  fonoId           BigInt
+  fechaAsignacion  DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  paciente Paciente      @relation(fields: [pacienteId], references: [id])
+  fono     Fonoaudiologo @relation(fields: [fonoId], references: [id])
+
+  @@index([pacienteId, fonoId], name: "idx_fono_paciente")
+}
+
+model MotivoConsulta {
+  id              BigInt   @id @default(autoincrement())
+  razonConsulta   String?
+  derivacion      String?
+  observaciones   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  historiaClinica HistoriaClinica[]
+}
+
+model Antecedentes {
+  id                  BigInt   @id @default(autoincrement())
+  embarazoParto       String?
+  desarrolloPsicomotor String?
+  enfermedadesPrevias String?
+  medicacionActual    String?
+  historiaFamiliar    String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  historiaClinica HistoriaClinica[]
+}
+
+model EvaluacionFono {
+  id          BigInt   @id @default(autoincrement())
+  lenguaje    String?
+  habla       String?
+  voz         String?
+  audicion    String?
+  deglucion   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  historiaClinica HistoriaClinica[]
+}
+
+model DiagnosticoFono {
+  id                BigInt    @id @default(autoincrement())
+  tipoTrastorno     TipoTrastorno
+  severidad         String?
+  areasComprometidas TipoRama?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  historiaClinica HistoriaClinica[]
+}
+
+model PlanFono {
+  id                    BigInt   @id @default(autoincrement())
+  objetivos             String?
+  frecuenciaSesiones    Decimal?
+  duracionTratamiento   Decimal?
+  tecnicas              String?
+  participacionFamiliar String?
+  estado                String?  @default("Activa")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  historiaClinica HistoriaClinica[]
+}
+
+model HistoriaClinica {
+  id              BigInt   @id @default(autoincrement())
+  pacienteId      BigInt
+  motivoId        BigInt
+  antecedenteId   BigInt
+  evaluacionId    BigInt
+  diagnosticoId   BigInt
+  planId          BigInt
+  estado          String?  @default("Activa")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  paciente      Paciente        @relation(fields: [pacienteId], references: [id])
+  motivo        MotivoConsulta  @relation(fields: [motivoId], references: [id])
+  antecedente   Antecedentes    @relation(fields: [antecedenteId], references: [id])
+  evaluacion    EvaluacionFono  @relation(fields: [evaluacionId], references: [id])
+  diagnostico   DiagnosticoFono @relation(fields: [diagnosticoId], references: [id])
+  plan          PlanFono        @relation(fields: [planId], references: [id])
+  fonoHistorias FonoHistoria[]
+  evoluciones   EvolucionFono[]
+
+  @@index([pacienteId], name: "idx_historia_paciente")
+}
+
+model FonoHistoria {
+  id              BigInt   @id @default(autoincrement())
+  historiaId      BigInt
+  fonoId          BigInt
+  fechaAsignacion DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  historia HistoriaClinica @relation(fields: [historiaId], references: [id])
+  fono     Fonoaudiologo   @relation(fields: [fonoId], references: [id])
+}
+
+model EvolucionFono {
+  id                BigInt   @id @default(autoincrement())
+  historiaClinicaId BigInt
+  fonoId            BigInt?
+  fechaSesion       DateTime?
+  motivo            String?
+  avances           String?
+  observaciones     String?
+  cambiosPlan       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  historiaClinica HistoriaClinica @relation(fields: [historiaClinicaId], references: [id])
+  fono            Fonoaudiologo?  @relation(fields: [fonoId], references: [id])
+
+  @@index([historiaClinicaId], name: "idx_evolucion_historia")
+}
+
+model Juego {
+  id               BigInt   @id @default(autoincrement())
+  titulo           String
+  rama             TipoRama
+  descripcion      String?
+  nivelDificultad  Decimal
+  experienciaDada  Decimal
+  estado           Boolean
+  fonoIdCreado     BigInt
+  fechaCreado      DateTime
+  tipoJuego        TipoJuego?
+  rangoEdad        RangoEdad @default(TODOS)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  fonoCreado       Usuario       @relation(fields: [fonoIdCreado], references: [id])
+  juegoCampoJs     JuegoCampoJ[]
+  instanciaJuegos  InstanciaJuego[]
+}
+
+model CampoJuego {
+  id              BigInt   @id @default(autoincrement())
+  tipoCampo       TipoCampo
+  titulo          String
+  ayuda           String?
+  consigna        String
+  rptaValida      String
+  opciones        Json?
+  imagenConsigna  Json?
+  rama            TipoRama?
+  audio           String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  juegoCampoJs    JuegoCampoJ[]
+}
+
+model JuegoCampoJ {
+  id           BigInt   @id @default(autoincrement())
+  juegoId      BigInt
+  campoJuegoId BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  juego        Juego      @relation(fields: [juegoId], references: [id])
+  campoJuego   CampoJuego @relation(fields: [campoJuegoId], references: [id])
+  rptaCampos   RptaCampo[]
+}
+
+model InstanciaJuego {
+  id               BigInt   @id @default(autoincrement())
+  pacienteId       BigInt
+  juegoId          BigInt
+  expGanada        Decimal?
+  fechaJuego       DateTime?
+  estado           EstadoJuego @default(ERROR)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  paciente         Paciente        @relation(fields: [pacienteId], references: [id])
+  juego            Juego           @relation(fields: [juegoId], references: [id])
+  rptaCampos       RptaCampo[]
+}
+
+model RptaCampo {
+  id                   BigInt   @id @default(autoincrement())
+  instanciaId          BigInt
+  relacionCampoJuegoId BigInt
+  valorRpta            String?
+  audioRpta            String?
+  acierto              Boolean
+  tiempo               DateTime
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  instancia          InstanciaJuego @relation(fields: [instanciaId], references: [id])
+  relacionCampoJuego JuegoCampoJ    @relation(fields: [relacionCampoJuegoId], references: [id])
+}
+
+model Usuario {
+  id           BigInt      @id @default(autoincrement())
+  personaId    BigInt      @unique
+  perfil       TipoUsuario
+  username     String
+  passwordHash String
+  activo       Boolean
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  persona          Persona          @relation(fields: [personaId], references: [id])
+  juegosCreados    Juego[]
+}
+
+model Nivel {
+  id          BigInt   @id @default(autoincrement())
+  nivel       Int
+  exp_minima  Int
+  exp_maxima  Int
+  descripcion String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Turno {
+  id            BigInt       @id @default(autoincrement())
+  pacienteId    BigInt
+  fonoId        BigInt
+  fecha         DateTime
+  estado        EstadosTurno
+  observaciones String
+  tipoSesion    String?      // este es el nuevo campo
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  paciente      Paciente      @relation(fields: [pacienteId], references: [id])
+  fono          Fonoaudiologo @relation(fields: [fonoId], references: [id])
+}

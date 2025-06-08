@@ -1,0 +1,137 @@
+-- 📄 vista_datos_fono
+CREATE VIEW vista_datos_fono AS
+SELECT 
+    u.id AS usuario_id,
+    f.id AS fono_id,
+    p.id AS persona_id,
+    p.nombre,
+    p.apellido,
+    f.matricula,
+    p.dni,
+    p.telefono,
+    p.mail,
+    f."direccionConsultorio",
+    f."fechaAlta"
+FROM "Fonoaudiologo" f
+JOIN "Persona" p ON f."personaId" = p.id
+JOIN "Usuario" u ON u."personaId" = p.id;
+
+-- 📄 vista_datos_paciente
+CREATE VIEW vista_datos_paciente AS
+SELECT 
+    u.id AS usuario_id,
+    pa.id AS paciente_id,
+    p.id AS persona_id,
+    p.nombre,
+    p.apellido,
+    p.dni,
+    pa.escolaridad,
+    pa.ocupacion,
+    pa."obraSocial",
+    p.telefono,
+    p.mail,
+    pa."fechaAlta"
+FROM "Paciente" pa
+JOIN "Persona" p ON pa."personaId" = p.id
+JOIN "Usuario" u ON u."personaId" = p.id;
+
+-- 📄 vista_pacientes_por_fono
+CREATE VIEW vista_pacientes_por_fono AS
+SELECT 
+    fpf.id AS asignacion_id,
+    f.id AS fono_id,
+    pf.nombre AS fono_nombre,
+    pf.apellido AS fono_apellido,
+    pa.id AS paciente_id,
+    pp.nombre AS paciente_nombre,
+    pp.apellido AS paciente_apellido,
+    DATE_PART('year', AGE(pp."fechaNac")) AS paciente_edad,
+    fpf."fechaAsignacion"
+FROM "FonoPaciente" fpf
+JOIN "Fonoaudiologo" f ON fpf."fonoId" = f.id
+JOIN "Persona" pf ON f."personaId" = pf.id
+JOIN "Paciente" pa ON fpf."pacienteId" = pa.id
+JOIN "Persona" pp ON pa."personaId" = pp.id;
+
+-- 📄 vista_historia_clinica_paciente
+CREATE VIEW vista_historia_clinica_paciente AS
+SELECT 
+    hc.id AS historia_id,
+    pa.id AS paciente_id,
+    p.nombre AS paciente_nombre,
+    p.apellido AS paciente_apellido,
+    m."razonConsulta",
+    a."embarazoParto",
+    e.lenguaje,
+    d."tipoTrastorno",
+    pl.objetivos,
+    hc.estado
+FROM "HistoriaClinica" hc
+JOIN "Paciente" pa ON hc."pacienteId" = pa.id
+JOIN "Persona" p ON pa."personaId" = p.id
+JOIN "MotivoConsulta" m ON hc."motivoId" = m.id
+JOIN "Antecedentes" a ON hc."antecedenteId" = a.id
+JOIN "EvaluacionFono" e ON hc."evaluacionId" = e.id
+JOIN "DiagnosticoFono" d ON hc."diagnosticoId" = d.id
+JOIN "PlanFono" pl ON hc."planId" = pl.id;
+
+-- 📄 vista_evolucion_paciente
+CREATE VIEW vista_evolucion_paciente AS
+SELECT 
+    ef.id AS evolucion_id,
+    hc.id AS historia_id,
+    pa.id AS paciente_id,
+    p.nombre AS paciente_nombre,
+    p.apellido AS paciente_apellido,
+    f.id AS fono_id,
+    pf.nombre AS fono_nombre,
+    pf.apellido AS fono_apellido,
+    ef."fechaSesion",
+    ef.avances,
+    ef.observaciones,
+    ef."cambiosPlan"
+FROM "EvolucionFono" ef
+JOIN "HistoriaClinica" hc ON ef."historiaClinicaId" = hc.id
+JOIN "Paciente" pa ON hc."pacienteId" = pa.id
+JOIN "Persona" p ON pa."personaId" = p.id
+JOIN "Fonoaudiologo" f ON ef."fonoId" = f.id
+JOIN "Persona" pf ON f."personaId" = pf.id;
+
+
+
+---
+
+-- Usuario
+CREATE INDEX idx_usuario_perfil ON "Usuario"(perfil);
+CREATE INDEX idx_usuario_persona_perfil ON "Usuario"("personaId", perfil);
+CREATE INDEX idx_usuario_username ON "Usuario"(username);
+CREATE INDEX idx_usuario_activo ON "Usuario"(activo);
+
+-- Persona
+CREATE INDEX idx_persona_nombre_apellido ON "Persona"(nombre, apellido);
+CREATE INDEX idx_persona_telefono ON "Persona"(telefono);
+CREATE INDEX idx_persona_mail ON "Persona"(mail);
+
+-- Fonoaudiologo
+CREATE INDEX idx_fonoaudiologo_matricula ON "Fonoaudiologo"(matricula);
+CREATE INDEX idx_fonoaudiologo_fecha_alta ON "Fonoaudiologo"("fechaAlta");
+
+-- Paciente
+CREATE INDEX idx_paciente_obra_social ON "Paciente"("obraSocial");
+CREATE INDEX idx_paciente_fecha_alta ON "Paciente"("fechaAlta");
+
+-- Relaciones
+CREATE INDEX idx_fonopaciente_fono ON "FonoPaciente"("fonoId");
+CREATE INDEX idx_fonopaciente_fecha ON "FonoPaciente"("fechaAsignacion");
+
+-- Historia Clínica
+CREATE INDEX idx_historiaclinica_estado ON "HistoriaClinica"(estado);
+-- Nota: verificá si tenés campo creado/updated para fecha creación
+CREATE INDEX idx_historiaclinica_fecha_creacion ON "HistoriaClinica"(created_at);
+CREATE INDEX idx_evolucionfono_fecha_sesion ON "EvolucionFono"("fechaSesion");
+
+-- Turnos
+CREATE INDEX idx_turno_fecha_hora ON "Turno"(fecha, hora);
+CREATE INDEX idx_turno_estado ON "Turno"(estado);
+CREATE INDEX idx_turno_paciente_fecha ON "Turno"("pacienteId", fecha);
+CREATE INDEX idx_turno_fono_fecha ON "Turno"("fonoId", fecha);
