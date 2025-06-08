@@ -40,14 +40,49 @@ export async function POST(request: Request) {
                 }
             }
 
+            // Special handling for ROLES type
+            let processedOpciones = fieldData.opciones;
+            let processedRptaValida = fieldData.rptaValida;
+
+            if (gameData.tipoJuego === 'ROLES') {
+                // Process options to include images and correct status
+                const options = JSON.parse(fieldData.opciones);
+                const processedOptions = options.map(async (option: any, index: number) => {
+                    const optionImage = formData.get(`opcionesRoles_${index}`) as File;
+                    let imageUrl = null;
+
+                    if (optionImage) {
+                        const bytes = await optionImage.arrayBuffer();
+                        const buffer = Buffer.from(bytes);
+                        const fileName = `${Date.now()}-${optionImage.name}`;
+                        const path = join(process.cwd(), 'public', 'uploads', fileName);
+                        await writeFile(path, buffer);
+                        imageUrl = `/uploads/${fileName}`;
+                    }
+
+                    return {
+                        text: option.text,
+                        isCorrect: option.isCorrect,
+                        urlImg: imageUrl
+                    };
+                });
+
+                processedOpciones = JSON.stringify(processedOptions);
+                processedRptaValida = JSON.stringify(
+                    processedOptions
+                        .filter((opt: any) => opt.isCorrect)
+                        .map((opt: any) => opt.text)
+                );
+            }
+
             // Create the game field
             const campoJuego = await prisma.campoJuego.create({
                 data: {
                     tipoCampo: fieldData.tipoCampo,
                     titulo: fieldData.titulo,
                     consigna: fieldData.consigna,
-                    rptaValida: fieldData.rptaValida,
-                    opciones: fieldData.opciones,
+                    rptaValida: processedRptaValida,
+                    opciones: processedOpciones,
                     imagenConsigna: imagenConsigna || undefined,
                     rama: gameData.rama,
                 },
@@ -62,7 +97,6 @@ export async function POST(request: Request) {
             });
         }
 
-        // Convert BigInt to string for JSON serialization
         return NextResponse.json({
             success: true,
             gameId: game.id.toString()

@@ -16,6 +16,17 @@ export default function GamePreview({ isOpen, onClose, gameType, gameData }: Gam
 
     const renderGamePreview = () => {
         switch (gameType) {
+            case 'CONSIGNA':
+                return (
+                    <GameQuestion
+                        tipo_juego="select"
+                        url_imagen={gameData.url_imagen}
+                        consigna={gameData.consigna}
+                        respuestas={gameData.respuestas}
+                        onRespuestaSeleccionada={() => { }}
+                    />
+                );
+
             case 'ROLES':
                 return (
                     <GameQuestion
@@ -52,6 +63,7 @@ export default function GamePreview({ isOpen, onClose, gameType, gameData }: Gam
                         textoCompleto={gameData.textoRepetir || ''}
                         textoSinCompletar={gameData.textoRepetir || ''}
                         palabraACompletar={gameData.textoRepetir || ''}
+                        onGameComplete={() => { }} // Add this line
                     />
                 );
 
@@ -63,6 +75,7 @@ export default function GamePreview({ isOpen, onClose, gameType, gameData }: Gam
                         textoCompleto={gameData.textoCompleto || ''}
                         textoSinCompletar={gameData.textoIncompleto || ''}
                         palabraACompletar={gameData.palabraCompletar || ''}
+                        onGameComplete={() => { }} // Add this line
                     />
                 );
 
