@@ -18,7 +18,8 @@ import {
     MapPin,
     GraduationCap,
     Briefcase,
-    Pencil
+    Pencil,
+    KeyRound
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +55,10 @@ export default function PacientesPage() {
     const [statusFilter, setStatusFilter] = useState<'todos' | 'activo' | 'inactivo' | 'pendiente'>('todos');
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
+    const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
+    const [isResettingPassword, setIsResettingPassword] = useState(false);
+    const [newPasswordModalOpen, setNewPasswordModalOpen] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
 
     useEffect(() => {
         fetchPacientes();
@@ -168,6 +173,44 @@ export default function PacientesPage() {
             setDeleteModalOpen(false);
             setSelectedPaciente(null);
         }
+    };
+
+    const handleResetPassword = async (pacienteId: number) => {
+        const paciente = pacientes.find(p => p.id === pacienteId);
+        if (!paciente) return;
+
+        setSelectedPaciente(paciente);
+        setResetPasswordModalOpen(true);
+    };
+
+    const handleConfirmResetPassword = async () => {
+        if (!selectedPaciente) return;
+
+        try {
+            setIsResettingPassword(true);
+            const response = await fetch(`/api/pacientes/${selectedPaciente.id}/reset-password`, {
+                method: 'POST',
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al resetear la contraseña');
+            }
+
+            const data = await response.json();
+            setNewPassword(data.password);
+            setResetPasswordModalOpen(false);
+            setNewPasswordModalOpen(true);
+        } catch (error: any) {
+            toast.error(error.message || 'Error al resetear la contraseña');
+        } finally {
+            setIsResettingPassword(false);
+            setSelectedPaciente(null);
+        }
+    };
+
+    const handleCopyPassword = () => {
+        navigator.clipboard.writeText(newPassword);
+        toast.success('Contraseña copiada al portapapeles');
     };
 
     return (
@@ -361,6 +404,16 @@ export default function PacientesPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
+                                                        className="text-blue-600 hover:text-blue-900"
+                                                        title="Resetear Contraseña"
+                                                        onClick={() => handleResetPassword(paciente.id)}
+                                                    >
+                                                        <KeyRound className="h-4 w-4" />
+                                                    </Button>
+
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
                                                         className="text-red-600 hover:text-red-900"
                                                         title="Eliminar Paciente"
                                                         onClick={() => handleDelete(paciente.id)}
@@ -384,6 +437,86 @@ export default function PacientesPage() {
                 onConfirm={handleConfirmDelete}
                 paciente={selectedPaciente as any}
             />
+
+            {/* Reset Password Modal */}
+            {resetPasswordModalOpen && selectedPaciente && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg shadow-lg max-w-md w-full">
+                        <div className="p-6">
+                            <div className="mb-4 text-center">
+                                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+                                    <KeyRound className="h-6 w-6 text-blue-600" />
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-900">Resetear Contraseña</h3>
+                                <p className="text-sm text-gray-500 mt-2">
+                                    ¿Estás seguro de que deseas resetear la contraseña de <strong>{selectedPaciente.nombre} {selectedPaciente.apellido}</strong>?
+                                </p>
+                                <p className="text-sm text-blue-500 mt-2 font-medium">
+                                    Se generará una nueva contraseña aleatoria que deberás compartir con el paciente.
+                                </p>
+                            </div>
+                            <div className="mt-5 flex justify-center gap-6">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setResetPasswordModalOpen(false)}
+                                    disabled={isResettingPassword}
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    variant="default"
+                                    onClick={handleConfirmResetPassword}
+                                    disabled={isResettingPassword}
+                                >
+                                    {isResettingPassword ? 'Reseteando...' : 'Resetear'}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* New Password Modal */}
+            {newPasswordModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg shadow-lg max-w-md w-full">
+                        <div className="p-6">
+                            <div className="mb-4 text-center">
+                                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                                    <KeyRound className="h-6 w-6 text-green-600" />
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-900">Nueva Contraseña Generada</h3>
+                                <p className="text-sm text-gray-500 mt-2">
+                                    La nueva contraseña para el paciente es:
+                                </p>
+                                <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                    <code className="text-lg font-mono">{newPassword}</code>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-4">
+                                    Por favor, copie esta contraseña y compártala con el paciente de manera segura.
+                                </p>
+                            </div>
+                            <div className="mt-5 flex justify-center gap-6">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setNewPasswordModalOpen(false);
+                                        setNewPassword('');
+                                    }}
+                                >
+                                    Cerrar
+                                </Button>
+                                <Button
+                                    variant="default"
+                                    onClick={handleCopyPassword}
+                                >
+                                    Copiar Contraseña
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

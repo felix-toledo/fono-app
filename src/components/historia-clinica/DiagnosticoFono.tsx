@@ -25,22 +25,32 @@ export const DiagnosticoFono = ({ data, onChange, disabled }: DiagnosticoFonoPro
         }
     }, [safeData.areasComprometidas]);
 
-    const handleAreasChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const options = e.target.options;
-        const selectedValues: string[] = [];
+    const handleAreaChange = (area: string, checked: boolean) => {
+        let newSelectedAreas: string[];
 
-        for (let i = 0; i < options.length; i++) {
-            if (options[i].selected) {
-                selectedValues.push(options[i].value);
-            }
+        if (checked) {
+            // Si se está marcando, agregar al array manteniendo las existentes
+            newSelectedAreas = [...selectedAreas, area];
+        } else {
+            // Si se está desmarcando, remover del array
+            newSelectedAreas = selectedAreas.filter(a => a !== area);
         }
 
-        setSelectedAreas(selectedValues);
-        // Only save the first selected value to the database
-        if (selectedValues.length > 0) {
-            onChange('areasComprometidas', selectedValues[0]);
+        setSelectedAreas(newSelectedAreas);
+
+        // Guardar la primera selección (o la única selección)
+        if (newSelectedAreas.length > 0) {
+            console.log('Área que se guardará:', newSelectedAreas[0]);
+            onChange('areasComprometidas', newSelectedAreas[0]);
         }
     };
+
+    const areas = [
+        { value: 'Pragmatica', label: 'Pragmática' },
+        { value: 'Semantica', label: 'Semántica' },
+        { value: 'Fonologia_y_Fonetica', label: 'Fonología y Fonética' },
+        { value: 'Morfosintaxis', label: 'Morfosintaxis' }
+    ];
 
     return (
         <div className="space-y-4">
@@ -71,20 +81,27 @@ export const DiagnosticoFono = ({ data, onChange, disabled }: DiagnosticoFonoPro
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Áreas Comprometidas
                     </label>
-                    <select
-                        multiple
-                        value={selectedAreas}
-                        onChange={handleAreasChange}
-                        disabled={disabled}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        size={4}
-                    >
-                        <option value="Pragmatica">Pragmática</option>
-                        <option value="Semantica">Semántica</option>
-                        <option value="Fonologia_y_Fonetica">Fonología y Fonética</option>
-                        <option value="Morfosintaxis">Morfosintaxis</option>
-                    </select>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <div className="space-y-2">
+                        {areas.map((area) => (
+                            <div key={area.value} className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id={area.value}
+                                    checked={selectedAreas.includes(area.value)}
+                                    onChange={(e) => handleAreaChange(area.value, e.target.checked)}
+                                    disabled={disabled}
+                                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                                />
+                                <label
+                                    htmlFor={area.value}
+                                    className="ml-2 block text-sm text-gray-700"
+                                >
+                                    {area.label}
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">
                         Seleccione las áreas comprometidas.
                     </p>
                 </div>

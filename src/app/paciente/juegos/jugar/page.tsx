@@ -46,33 +46,34 @@ export default function Jugar() {
     const [juegoActualIndex, setJuegoActualIndex] = useState(0);
     const [gameCompleted, setGameCompleted] = useState(false);
 
-    useEffect(() => {
-        const fetchJuegos = async () => {
-            try {
-                const pacienteId = getPacienteId();
-                if (!pacienteId) {
-                    setError('No se encontró el ID del paciente');
-                    return;
-                }
-
-                // Fetch filtered games
-                const response = await fetch(`/api/paciente/juegos/filtrados?pacienteId=${pacienteId}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    setJuegos(data.juegos);
-                    setFiltros(data.filtros);
-                } else {
-                    setError('Error al cargar los juegos');
-                }
-            } catch (err) {
-                console.error('Error:', err);
-                setError('Error al cargar los datos');
-            } finally {
-                setLoading(false);
+    const fetchJuegos = async () => {
+        try {
+            const pacienteId = getPacienteId();
+            if (!pacienteId) {
+                setError('No se encontró el ID del paciente');
+                return;
             }
-        };
 
+            // Fetch filtered games
+            const response = await fetch(`/api/paciente/juegos/filtrados?pacienteId=${pacienteId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                setJuegos(data.juegos);
+                setFiltros(data.filtros);
+                setError(null);
+            } else {
+                setError('Error al cargar los juegos');
+            }
+        } catch (err) {
+            console.error('Error:', err);
+            setError('Error al cargar los datos');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchJuegos();
     }, [getPacienteId]);
 
@@ -175,7 +176,7 @@ export default function Jugar() {
                     pacienteId,
                     juegoId: juegoActual.id,
                     expGanada,
-                    estado // Asegurarnos de que este es el estado correcto
+                    estado
                 })
             });
 
@@ -205,9 +206,12 @@ export default function Jugar() {
                     setJuegoActual(juegos[nextIndex]);
                     setGameCompleted(false);
                 } else {
+                    // En lugar de recargar la página, reseteamos el estado y volvemos a cargar los juegos
                     setShowStartButton(true);
                     setJuegoActual(null);
                     setJuegoActualIndex(0);
+                    setLoading(true);
+                    await fetchJuegos();
                 }
             }
         } catch (error) {
