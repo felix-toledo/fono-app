@@ -144,7 +144,7 @@ export default function AudioRecorder({ onTranscripcion, modoPalabraUnica = fals
                             : 'bg-blue-500 hover:bg-blue-600'
                             } text-white transition-colors`}
                     >
-                        {isRecording ? 'Stop Recording' : 'Start Recording'}
+                        {isRecording ? 'Click para detener' : 'Click para grabar'}
                     </button>
                 </div>
 

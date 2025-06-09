@@ -179,22 +179,11 @@ export default function Dashboard() {
 
             {/* Actividad reciente + Perfil */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg shadow p-5">
-                    <h3 className="font-medium text-gray-800 mb-3">Actividad reciente</h3>
-                    <div className="divide-y">
-                        <div className="flex justify-between py-2">
-                            <span className="text-sm text-gray-700">Turnos de esta semana</span>
-                            <span className="font-medium text-primary">8</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                            <span className="text-sm text-gray-700">Pacientes nuevos este mes</span>
-                            <span className="font-medium text-secondary">5</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                            <span className="text-sm text-gray-700">Sesiones completadas</span>
-                            <span className="font-medium text-accent">24</span>
-                        </div>
-                    </div>
+                <div>
+                    <RecentPatientsTable
+                        patients={pacientesRecientes}
+                        onPatientClick={navegarADetallesPaciente}
+                    />
                 </div>
 
                 <UserProfile
@@ -205,14 +194,6 @@ export default function Dashboard() {
                         pacientes: stats.pacientesTotales,
                         regulares: stats.pacientesRegulares
                     }}
-                />
-            </div>
-
-            {/* Pacientes Recientes - Full width */}
-            <div>
-                <RecentPatientsTable
-                    patients={pacientesRecientes}
-                    onPatientClick={navegarADetallesPaciente}
                 />
             </div>
         </div>

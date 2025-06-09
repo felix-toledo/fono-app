@@ -134,7 +134,7 @@ const Turnos = () => {
         hoy.setHours(0, 0, 0, 0);
         const fechaComparar = new Date(fecha);
         fechaComparar.setHours(0, 0, 0, 0);
-        return fechaComparar < hoy;
+        return fechaComparar <= hoy;
     };
 
     // Función para manejar la edición de un turno

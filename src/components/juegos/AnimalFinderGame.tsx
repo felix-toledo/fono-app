@@ -17,7 +17,11 @@ interface Animal {
   found: boolean
 }
 
-export default function AnimalFinderGame() {
+interface AnimalFinderGameProps {
+  onGameComplete?: (estado: 'GANADO' | 'PERDIDO' | 'ERROR', expGanada?: string) => void;
+}
+
+export default function AnimalFinderGame({ onGameComplete }: AnimalFinderGameProps) {
   // Actualizado con las posiciones exactas basadas en los nombres en negro
   const [animals, setAnimals] = useState<Animal[]>([
     {
@@ -99,9 +103,11 @@ export default function AnimalFinderGame() {
     const foundCount = animals.filter((animal) => animal.found).length
     if (foundCount === animals.length && gameStarted) {
       setGameCompleted(true)
-      setScore(Math.max(1000 - timeElapsed * 10, 100))
+      const finalScore = Math.max(1000 - timeElapsed * 10, 100)
+      setScore(finalScore)
+      onGameComplete?.('GANADO', finalScore.toString())
     }
-  }, [animals, gameStarted, timeElapsed])
+  }, [animals, gameStarted, timeElapsed, onGameComplete])
 
   // Función para manejar clics en toda la imagen
   const handleImageClick = (event: React.MouseEvent<HTMLDivElement>) => {

@@ -167,7 +167,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
                 },
                 fonoPacientes: true,
                 turnos: true,
-                historiaClinica: true
+                historiaClinica: true,
+                instanciaJuegos: true
             }
         });
 
@@ -201,19 +202,26 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
                 });
             }
 
-            // 4. Delete Paciente
+            // 4. Delete InstanciaJuegos
+            if (paciente.instanciaJuegos.length > 0) {
+                await tx.instanciaJuego.deleteMany({
+                    where: { pacienteId }
+                });
+            }
+
+            // 5. Delete Paciente
             await tx.paciente.delete({
                 where: { id: pacienteId }
             });
 
-            // 5. Delete Usuario if exists
+            // 6. Delete Usuario if exists
             if (paciente.persona.usuario) {
                 await tx.usuario.delete({
                     where: { id: paciente.persona.usuario.id }
                 });
             }
 
-            // 6. Delete Persona
+            // 7. Delete Persona
             await tx.persona.delete({
                 where: { id: paciente.personaId }
             });

@@ -250,7 +250,7 @@ export async function DELETE(request: Request) {
         const fechaTurno = new Date(turno.fecha);
         fechaTurno.setHours(0, 0, 0, 0);
 
-        if (fechaTurno < hoy) {
+        if (fechaTurno <= hoy) {
             return NextResponse.json(
                 { error: 'No se pueden eliminar turnos de días anteriores' },
                 { status: 400 }

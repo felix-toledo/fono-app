@@ -5,6 +5,7 @@ import { usePaciente } from '@/contexts/PacienteContext';
 import GameQuestion from '@/components/juegos/dinamic/GameQuestion';
 import FotosHabla from '@/components/juegos/dinamic/FotosHabla';
 import OrdenGame from '@/components/juegos/dinamic/OrdenGame';
+import AnimalFinderGame from '@/components/juegos/AnimalFinderGame';
 import { SoundProvider } from '@/contexts/SoundContext';
 
 interface Juego {
@@ -216,6 +217,13 @@ export default function Jugar() {
 
     const renderGame = () => {
         if (!juegoActual) return null;
+
+        // Special case for safari game
+        if (juegoActual.tipoJuego === 'EMOCIONES' &&
+            juegoActual.rama === 'Semantica' &&
+            juegoActual.titulo.toLowerCase() === 'safari') {
+            return <AnimalFinderGame onGameComplete={handleGameComplete} />;
+        }
 
         const gameData = prepareGameData(juegoActual);
         if (!gameData) return null;
