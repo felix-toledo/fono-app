@@ -339,7 +339,7 @@ export default function Juegos() {
                                         type="text"
                                         placeholder="Respuesta"
                                         value={op.text}
-                                        onChange={(e) => handleOptionChange(index, 'text', e.target.value)}
+                                        onChange={(e) => handleOptionChange(index, 'opciones', e.target.value)}
                                         className="w-full p-2 border rounded"
                                     />
                                     <button type="button" onClick={() => handleOpenBiblioteca(`opciones_${index}`)} className="p-2 border rounded text-gray-600 hover:bg-gray-100">
@@ -349,7 +349,7 @@ export default function Juegos() {
                                         <input
                                             type="checkbox"
                                             checked={op.isCorrect}
-                                            onChange={(e) => handleOptionChange(index, 'isCorrect', '', e.target.checked)}
+                                            onChange={(e) => handleOptionChange(index, 'opciones', op.text, e.target.checked)}
                                         />
                                         <span className="text-sm">Correcta</span>
                                     </label>
@@ -662,7 +662,7 @@ export default function Juegos() {
                         className="w-full p-2 border rounded-md"
                         required
                     >
-                        <option value="ROLES">Consigna Rpta</option>
+                        <option value="ROLES">Consignas y respuestas</option>
                         <option value="REPETIR">Repetir</option>
                         <option value="HABLAR">Hablar</option>
                         <option value="ORDEN">Orden</option>
@@ -707,15 +707,13 @@ export default function Juegos() {
                     gameType={formData.tipoJuego}
                     gameData={
                         formData.tipoJuego === 'ROLES' ? {
-                            tipo_juego: 'select',
-                            url_imagen: gameFields.imagenConsigna,
-                            consigna: gameFields.consigna || '',
-                            respuestas: gameFields.opciones?.map(opt => ({
-                                texto: opt.text,
-                                esCorrecta: opt.isCorrect,
+                            preguntaPrincipal: gameFields.consigna || '',
+                            opcionesRoles: gameFields.opciones?.map(opt => ({
+                                text: opt.text,
+                                isCorrect: opt.isCorrect,
                                 urlImg: opt.urlImg
                             })) || [],
-                            onRespuestaSeleccionada: () => { }
+                            imagenRoles: gameFields.imagenConsigna
                         } : formData.tipoJuego === 'REPETIR' ? {
                             imagenRepetir: gameFields.imagenRepetir,
                             textoRepetir: gameFields.textoRepetir

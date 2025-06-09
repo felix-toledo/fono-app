@@ -80,7 +80,6 @@ export default function VerJuegosPage() {
         const campoJuego = juego.juegoCampoJs[0]?.campoJuego;
         if (!campoJuego) return null;
 
-
         // Mapear según el tipo de juego
         switch (juego.tipoJuego) {
             case 'REPETIR':
@@ -128,6 +127,12 @@ export default function VerJuegosPage() {
                 };
 
             case 'EMOCIONES':
+                // Check if it's the safari game
+                if (juego.rama === 'Semantica' && juego.titulo.toLowerCase() === 'safari') {
+                    return {
+                        isSafari: true
+                    };
+                }
                 return {
                     consignaEmociones: campoJuego.consigna,
                     opcionesEmociones: campoJuego.opciones ? JSON.parse(campoJuego.opciones) : [],
@@ -178,13 +183,13 @@ export default function VerJuegosPage() {
 
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 overflow-x-hidden">
             <h1 className="text-2xl font-bold mb-6">Juegos Disponibles</h1>
 
             {/* Filtros */}
             <div className="bg-white rounded-lg shadow p-4 mb-6">
                 <h2 className="text-lg font-semibold mb-4">Filtros</h2>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <select
                         className="border rounded p-2"
                         value={filtros.rama}
@@ -245,7 +250,7 @@ export default function VerJuegosPage() {
             {/* Lista de juegos */}
             <div className="grid gap-4">
                 {juegosFiltrados.map((juego) => (
-                    <div key={juego.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-4">
+                    <div key={juego.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-4 overflow-hidden">
                         <div className="flex justify-between items-start mb-4">
                             <h2 className="text-xl font-bold">{juego.titulo}</h2>
                             <div className="flex gap-2">

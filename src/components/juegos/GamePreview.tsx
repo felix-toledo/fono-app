@@ -3,6 +3,7 @@ import GameQuestion from './dinamic/GameQuestion';
 import FotosHabla from './dinamic/FotosHabla';
 import OrdenGame from './dinamic/OrdenGame';
 import { SoundProvider } from '@/contexts/SoundContext';
+import AnimalFinderGame from './AnimalFinderGame';
 
 interface GamePreviewProps {
     isOpen: boolean;
@@ -31,21 +32,25 @@ export default function GamePreview({ isOpen, onClose, gameType, gameData }: Gam
                 return (
                     <GameQuestion
                         tipo_juego="select"
-                        url_imagen={gameData.imagenRoles ? URL.createObjectURL(gameData.imagenRoles) : '/placeholder.jpg'}
+                        url_imagen={gameData.imagenRoles || '/placeholder.jpg'}
                         consigna={gameData.preguntaPrincipal || ''}
                         respuestas={gameData.opcionesRoles?.map((opt: any) => ({
                             texto: opt.text,
-                            esCorrecta: opt.isCorrect
+                            esCorrecta: opt.isCorrect,
+                            urlImg: opt.urlImg
                         })) || []}
                         onRespuestaSeleccionada={() => { }}
                     />
                 );
 
             case 'EMOCIONES':
+                if (gameData.isSafari) {
+                    return <AnimalFinderGame onGameComplete={() => { }} />;
+                }
                 return (
                     <GameQuestion
                         tipo_juego="select"
-                        url_imagen={gameData.imagenEmociones ? URL.createObjectURL(gameData.imagenEmociones) : '/placeholder.jpg'}
+                        url_imagen={gameData.imagenEmociones || '/placeholder.jpg'}
                         consigna={gameData.consignaEmociones || ''}
                         respuestas={gameData.opcionesEmociones?.map((opt: any) => ({
                             texto: opt.text,
@@ -96,7 +101,7 @@ export default function GamePreview({ isOpen, onClose, gameType, gameData }: Gam
                 return (
                     <GameQuestion
                         tipo_juego="select"
-                        url_imagen={gameData.imagenesCompletar?.[0] ? URL.createObjectURL(gameData.imagenesCompletar[0]) : '/placeholder.jpg'}
+                        url_imagen={gameData.imagenesCompletar?.[0] || '/placeholder.jpg'}
                         consigna={gameData.textoIncompletoCompletar || ''}
                         respuestas={gameData.opcionesCompletar?.map((opt: string) => ({
                             texto: opt,

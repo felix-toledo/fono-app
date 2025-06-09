@@ -140,16 +140,7 @@ export default function Login() {
                                 </label>
                             </div>
 
-                            <div className="text-sm">
-                                <Button
-                                    type="button"
-                                    variant="link"
-                                    onClick={() => toast.info('Función no disponible en esta versión')}
-                                    className="text-primary hover:text-primary-hover"
-                                >
-                                    ¿Olvidaste tu contraseña?
-                                </Button>
-                            </div>
+
                         </div>
 
                         <div>
@@ -175,15 +166,6 @@ export default function Login() {
                             </Button>
                         </div>
                     </form>
-
-                    <div className="mt-6 text-center text-sm">
-                        <p className="text-gray-600">
-                            ¿No tienes una cuenta?{' '}
-                            <Link href="/registro" className="text-primary hover:text-primary-hover font-medium">
-                                Regístrate aquí
-                            </Link>
-                        </p>
-                    </div>
                 </Card>
             </div>
         </div>
