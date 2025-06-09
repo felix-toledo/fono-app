@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import BibliotecaImagen from '@/components/BibliotecaImagen';
 import Image from 'next/image';
 import { Image as ImageIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Option {
     text: string;
@@ -317,81 +318,53 @@ export default function Juegos() {
         switch (formData.tipoJuego) {
             case 'ROLES':
                 return (
-                    <>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Consigna
-                            </label>
-                            <textarea
-                                value={gameFields.consigna || ''}
-                                onChange={(e) => setGameFields(prev => ({ ...prev, consigna: e.target.value }))}
-                                className="w-full p-2 border rounded-md"
-                                rows={3}
-                                required
-                            />
-                        </div>
+                    <div className="space-y-4">
                         {renderImagenConsigna()}
                         <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Respuestas
-                            </label>
-                            {gameFields.opciones?.map((option, index) => (
-                                <div key={index} className="flex gap-2 mb-2">
-                                    <div className="flex-1 flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={option.text}
-                                            onChange={(e) => handleOptionChange(index, 'opciones', e.target.value)}
-                                            className="flex-1 p-2 border rounded-md"
-                                            placeholder="Respuesta"
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => handleOpenBiblioteca(`opciones_${index}`)}
-                                            className="p-2 text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
-                                            title="Seleccionar imagen"
-                                        >
-                                            <ImageIcon size={20} />
-                                        </button>
-                                    </div>
-                                    <label className="flex items-center">
+                            <label htmlFor="consigna" className="block text-sm font-medium mb-1">Consigna</label>
+                            <textarea
+                                id="consigna"
+                                name="consigna"
+                                value={gameFields.consigna || ''}
+                                onChange={(e) => setGameFields({ ...gameFields, consigna: e.target.value })}
+                                className="w-full p-2 border rounded"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Respuestas</label>
+                            {gameFields.opciones?.map((op, index) => (
+                                <div key={index} className="flex items-center gap-2 mb-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Respuesta"
+                                        value={op.text}
+                                        onChange={(e) => handleOptionChange(index, 'text', e.target.value)}
+                                        className="w-full p-2 border rounded"
+                                    />
+                                    <button type="button" onClick={() => handleOpenBiblioteca(`opciones_${index}`)} className="p-2 border rounded text-gray-600 hover:bg-gray-100">
+                                        <ImageIcon size={20} />
+                                    </button>
+                                    <label className="flex items-center gap-1">
                                         <input
                                             type="checkbox"
-                                            checked={option.isCorrect}
-                                            onChange={(e) => handleOptionChange(index, 'opciones', option.text, e.target.checked)}
-                                            className="mr-2"
+                                            checked={op.isCorrect}
+                                            onChange={(e) => handleOptionChange(index, 'isCorrect', '', e.target.checked)}
                                         />
-                                        Correcta
+                                        <span className="text-sm">Correcta</span>
                                     </label>
                                     <button
                                         type="button"
                                         onClick={() => removeOption('opciones', index)}
-                                        className="px-2 py-1 bg-red-500 text-white rounded"
+                                        className="px-3 py-2 bg-accent/80 text-white rounded hover:bg-accent"
                                     >
                                         X
                                     </button>
-                                    {option.urlImg && (
-                                        <div className="relative w-8 h-8">
-                                            <Image
-                                                src={option.urlImg}
-                                                alt="Imagen de respuesta"
-                                                fill
-                                                className="object-contain rounded-md"
-                                            />
-                                        </div>
-                                    )}
                                 </div>
                             ))}
-                            <button
-                                type="button"
-                                onClick={() => addOption('opciones')}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-                            >
-                                Agregar Respuesta
-                            </button>
+                            <Button type="button" onClick={() => addOption('opciones')}>Agregar Respuesta</Button>
                         </div>
-                    </>
+                    </div>
                 );
 
             case 'REPETIR':
@@ -575,166 +548,159 @@ export default function Juegos() {
     };
 
     return (
-        <div className="min-h-screen bg-background p-8">
-            <div className="max-w-2xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8">Crear Nuevo Juego</h1>
+        <div className="container mx-auto p-6 bg-white rounded-lg shadow-md">
+            <h1 className="text-2xl font-bold mb-6">Crear Nuevo Juego</h1>
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                    <label htmlFor="titulo" className="block text-sm font-medium mb-2">
+                        Título del Juego
+                    </label>
+                    <input
+                        type="text"
+                        id="titulo"
+                        name="titulo"
+                        value={formData.titulo}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded-md"
+                        required
+                    />
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label htmlFor="titulo" className="block text-sm font-medium mb-2">
-                            Título del Juego
-                        </label>
-                        <input
-                            type="text"
-                            id="titulo"
-                            name="titulo"
-                            value={formData.titulo}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-md"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="rama" className="block text-sm font-medium mb-2">
-                            Rama
-                        </label>
-                        <select
-                            id="rama"
-                            name="rama"
-                            value={formData.rama}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-md"
-                            required
-                        >
-                            <option value="Pragmatica">Pragmática</option>
-                            <option value="Semantica">Semántica</option>
-                            <option value="Fonologia_y_Fonetica">Fonología y Fonética</option>
-                            <option value="Morfosintaxis">Morfosintaxis</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="rangoEdad" className="block text-sm font-medium mb-2">
-                            Rango de Edad
-                        </label>
-                        <select
-                            id="rangoEdad"
-                            name="rangoEdad"
-                            value={formData.rangoEdad}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-md"
-                            required
-                        >
-                            <option value="TODOS">Todos</option>
-                            <option value="DE_4_A_6">De 4 a 6 años</option>
-                            <option value="DE_7_A_10">De 7 a 10 años</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="descripcion" className="block text-sm font-medium mb-2">
-                            Descripción
-                        </label>
-                        <textarea
-                            id="descripcion"
-                            name="descripcion"
-                            value={formData.descripcion}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-md"
-                            rows={4}
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="nivelDificultad" className="block text-sm font-medium mb-2">
-                            Nivel de Dificultad (1-5)
-                        </label>
-                        <input
-                            type="number"
-                            id="nivelDificultad"
-                            name="nivelDificultad"
-                            value={formData.nivelDificultad}
-                            onChange={handleChange}
-                            min="1"
-                            max="5"
-                            className="w-full p-2 border rounded-md"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="experienciaDada" className="block text-sm font-medium mb-2">
-                            Experiencia Otorgada
-                        </label>
-                        <input
-                            type="number"
-                            id="experienciaDada"
-                            name="experienciaDada"
-                            value={formData.experienciaDada}
-                            onChange={handleChange}
-                            min="1"
-                            className="w-full p-2 border rounded-md"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="tipoJuego" className="block text-sm font-medium mb-2">
-                            Tipo de Juego
-                        </label>
-                        <select
-                            id="tipoJuego"
-                            name="tipoJuego"
-                            value={formData.tipoJuego}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-md"
-                            required
-                        >
-                            <option value="ROLES">Consigna Rpta</option>
-                            <option value="REPETIR">Repetir</option>
-                            <option value="HABLAR">Hablar</option>
-                            <option value="ORDEN">Orden</option>
-                        </select>
-                    </div>
-
-                    <div className="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="estado"
-                            name="estado"
-                            checked={formData.estado}
-                            onChange={handleChange}
-                            className="mr-2"
-                        />
-                        <label htmlFor="estado" className="text-sm font-medium">
-                            Juego Activo
-                        </label>
-                    </div>
-
-                    {/* Dynamic fields based on game type */}
-                    <div className="mt-8 p-4 border rounded-md bg-gray-50">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold">Campos Específicos del Juego</h2>
-                            <button
-                                type="button"
-                                onClick={() => setShowPreview(true)}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                            >
-                                Vista Previa
-                            </button>
-                        </div>
-                        {renderGameTypeFields()}
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition-colors"
+                <div>
+                    <label htmlFor="rama" className="block text-sm font-medium mb-2">
+                        Rama
+                    </label>
+                    <select
+                        id="rama"
+                        name="rama"
+                        value={formData.rama}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded-md"
+                        required
                     >
-                        Crear Juego
-                    </button>
-                </form>
+                        <option value="Pragmatica">Pragmática</option>
+                        <option value="Semantica">Semántica</option>
+                        <option value="Fonologia_y_Fonetica">Fonología y Fonética</option>
+                        <option value="Morfosintaxis">Morfosintaxis</option>
+                    </select>
+                </div>
 
+                <div>
+                    <label htmlFor="rangoEdad" className="block text-sm font-medium mb-2">
+                        Rango de Edad
+                    </label>
+                    <select
+                        id="rangoEdad"
+                        name="rangoEdad"
+                        value={formData.rangoEdad}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded-md"
+                        required
+                    >
+                        <option value="TODOS">Todos</option>
+                        <option value="DE_4_A_6">De 4 a 6 años</option>
+                        <option value="DE_7_A_10">De 7 a 10 años</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label htmlFor="descripcion" className="block text-sm font-medium mb-2">
+                        Descripción
+                    </label>
+                    <textarea
+                        id="descripcion"
+                        name="descripcion"
+                        value={formData.descripcion}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded-md"
+                        rows={4}
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="nivelDificultad" className="block text-sm font-medium mb-2">
+                        Nivel de Dificultad (1-5)
+                    </label>
+                    <input
+                        type="number"
+                        id="nivelDificultad"
+                        name="nivelDificultad"
+                        value={formData.nivelDificultad}
+                        onChange={handleChange}
+                        min="1"
+                        max="5"
+                        className="w-full p-2 border rounded-md"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="experienciaDada" className="block text-sm font-medium mb-2">
+                        Experiencia Otorgada
+                    </label>
+                    <input
+                        type="number"
+                        id="experienciaDada"
+                        name="experienciaDada"
+                        value={formData.experienciaDada}
+                        onChange={handleChange}
+                        min="1"
+                        className="w-full p-2 border rounded-md"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="tipoJuego" className="block text-sm font-medium mb-2">
+                        Tipo de Juego
+                    </label>
+                    <select
+                        id="tipoJuego"
+                        name="tipoJuego"
+                        value={formData.tipoJuego}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded-md"
+                        required
+                    >
+                        <option value="ROLES">Consigna Rpta</option>
+                        <option value="REPETIR">Repetir</option>
+                        <option value="HABLAR">Hablar</option>
+                        <option value="ORDEN">Orden</option>
+                    </select>
+                </div>
+
+                <div className="flex items-center">
+                    <input
+                        type="checkbox"
+                        id="estado"
+                        name="estado"
+                        checked={formData.estado}
+                        onChange={handleChange}
+                        className="mr-2"
+                    />
+                    <label htmlFor="estado" className="text-sm font-medium">
+                        Juego Activo
+                    </label>
+                </div>
+
+                {/* Game Specific Fields */}
+                <div className="p-4 border-t">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-semibold">Campos Específicos del Juego</h2>
+                        <Button type="button" variant="outline" onClick={() => setShowPreview(true)}>Vista Previa</Button>
+                    </div>
+                    {renderGameTypeFields()}
+                </div>
+
+                <div className="flex justify-end gap-4">
+                    <Button type="submit">
+                        Crear Juego
+                    </Button>
+                </div>
+            </form>
+
+            {/* Preview Modal */}
+            {showPreview && (
                 <GamePreview
                     isOpen={showPreview}
                     onClose={() => setShowPreview(false)}
@@ -766,13 +732,13 @@ export default function Juegos() {
                         } : undefined
                     }
                 />
+            )}
 
-                <BibliotecaImagen
-                    isOpen={showBiblioteca}
-                    onClose={() => setShowBiblioteca(false)}
-                    onSelectImage={handleSelectImage}
-                />
-            </div>
+            <BibliotecaImagen
+                isOpen={showBiblioteca}
+                onClose={() => setShowBiblioteca(false)}
+                onSelectImage={handleSelectImage}
+            />
         </div>
     );
 } 

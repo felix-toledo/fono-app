@@ -72,13 +72,17 @@ export const Sidebar = () => {
 
     return (
         <>
-            {/* Hamburger button for mobile */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md text-black/30 hover:bg-primary/40 hover:text-white transition-colors backdrop-blur"
-            >
-                <Menu size={24} />
-            </button>
+            {/* Header for mobile */}
+            <header className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+                <div className="flex items-center justify-between h-14 px-4">
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="p-2 rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
+                    >
+                        <Menu size={24} />
+                    </button>
+                </div>
+            </header>
 
             {/* Backdrop for mobile */}
             {isOpen && (

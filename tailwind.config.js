@@ -20,16 +20,28 @@ module.exports = {
                 background: 'hsl(var(--background))',
                 foreground: 'hsl(var(--foreground))',
                 primary: {
-                    DEFAULT: 'hsl(var(--primary))',
-                    hover: 'hsl(var(--primary-hover))',
+                    DEFAULT: "hsl(var(--primary))",
+                    foreground: "hsl(var(--primary-foreground))",
                 },
                 secondary: {
-                    DEFAULT: 'hsl(var(--secondary))',
-                    hover: 'hsl(var(--secondary-hover))',
+                    DEFAULT: "hsl(var(--secondary))",
+                    foreground: "hsl(var(--secondary-foreground))",
+                },
+                destructive: {
+                    DEFAULT: "hsl(var(--destructive))",
+                    foreground: "hsl(var(--destructive-foreground))",
+                },
+                muted: {
+                    DEFAULT: "hsl(var(--muted))",
+                    foreground: "hsl(var(--muted-foreground))",
                 },
                 accent: {
-                    DEFAULT: 'hsl(var(--accent))',
-                    foreground: 'hsl(var(--accent-foreground))',
+                    DEFAULT: "hsl(var(--accent))",
+                    foreground: "hsl(var(--accent-foreground))",
+                },
+                popover: {
+                    DEFAULT: "hsl(var(--popover))",
+                    foreground: "hsl(var(--popover-foreground))",
                 },
                 card: {
                     DEFAULT: 'hsl(var(--card))',
@@ -49,7 +61,7 @@ module.exports = {
                     DEFAULT: "#3b82f6", // Azul claro
                     hover: "#2563eb",
                 },
-                border: "#e2e8f0",
+                border: "hsl(var(--border))",
                 sidebar: "#f1f5f9",
                 "sidebar-hover": "#e2e8f0",
             },
