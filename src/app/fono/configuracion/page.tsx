@@ -153,7 +153,7 @@ const Configuracion = () => {
                     'x-session-data': JSON.stringify({ userId: getFonoId() })
                 }
             });
-            toast.success('Perfil actualizado correctamente');
+            toast.success('Perfil actualizado correctamente. Para ver reflejado el cambio, debes cerrar sesión y volver a iniciarla :)');
         } catch (error) {
             console.error('Error updating profile:', error);
             toast.error('Error al actualizar el perfil');

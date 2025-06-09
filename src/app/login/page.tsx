@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
@@ -19,6 +19,30 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
 
     const router = useRouter();
+
+    useEffect(() => {
+        const userSession = localStorage.getItem('userSession');
+        if (userSession) {
+            const userData = JSON.parse(userSession);
+            // Redirigir según el perfil
+            switch (userData.perfil) {
+                case TipoUsuario.FONO:
+                    router.push('/fono');
+                    break;
+                case TipoUsuario.PACIENTE:
+                    router.push('/paciente/');
+                    break;
+                case TipoUsuario.ADMIN:
+                    router.push('/admin');
+                    break;
+                case TipoUsuario.TUTOR:
+                    router.push('/tutor');
+                    break;
+                default:
+                    router.push('/');
+            }
+        }
+    }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

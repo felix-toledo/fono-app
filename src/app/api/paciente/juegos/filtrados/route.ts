@@ -54,6 +54,7 @@ export async function GET(request: Request) {
 
         // Get compromised area from active clinical history
         const areaComprometida = paciente.historiaClinica[0]?.diagnostico.areasComprometidas;
+        console.log('Área comprometida del paciente:', areaComprometida);
 
         // 2. Get games that the patient has already won
         const juegosGanados = await prisma.instanciaJuego.findMany({
@@ -67,6 +68,7 @@ export async function GET(request: Request) {
         });
 
         const juegosGanadosIds = juegosGanados.map(j => j.juegoId);
+        console.log('Juegos ya ganados (IDs):', juegosGanadosIds);
 
         // 3. Fetch games with filters
         const juegos = await prisma.juego.findMany({
@@ -78,14 +80,7 @@ export async function GET(request: Request) {
                             { rangoEdad: RangoEdad.TODOS }
                         ]
                     },
-                    {
-                        OR: areaComprometida ? [
-                            { rama: areaComprometida },
-                            { rama: undefined }
-                        ] : [
-                            { rama: undefined }
-                        ]
-                    },
+                    areaComprometida ? { rama: areaComprometida } : {}, // Only show games that match the patient's compromised area if it exists
                     { estado: true }, // Only active games
                     { id: { notIn: juegosGanadosIds } } // Exclude games already won
                 ]
@@ -101,6 +96,15 @@ export async function GET(request: Request) {
                 fechaCreado: 'desc'
             }
         });
+
+        console.log('Juegos filtrados encontrados:', juegos.length);
+        console.log('Detalles de los juegos filtrados:', juegos.map(j => ({
+            id: j.id,
+            titulo: j.titulo,
+            rama: j.rama,
+            rangoEdad: j.rangoEdad,
+            tipoJuego: j.tipoJuego
+        })));
 
         // Custom replacer function to handle BigInt
         const replacer = (key: string, value: any) => {

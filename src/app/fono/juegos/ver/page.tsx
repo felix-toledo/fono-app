@@ -45,6 +45,7 @@ export default function VerJuegosPage() {
     });
     const [juegoSeleccionado, setJuegoSeleccionado] = useState<Juego | null>(null);
     const [showPreview, setShowPreview] = useState(false);
+    const [previewGameData, setPreviewGameData] = useState<any>(null);
 
     useEffect(() => {
         const fetchJuegos = async () => {
@@ -148,6 +149,7 @@ export default function VerJuegosPage() {
         const gameData = prepareGameData(juego);
         if (gameData) {
             setJuegoSeleccionado(juego);
+            setPreviewGameData(gameData);
             setShowPreview(true);
         }
     };
@@ -291,30 +293,19 @@ export default function VerJuegosPage() {
                                 ))}
                             </div>
                         </div>
-                        <div className="mt-4 flex justify-end">
-                            <button
-                                onClick={() => handlePreview(juego)}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                            >
-                                Ver Vista Previa
-                            </button>
-                        </div>
                     </div>
                 ))}
             </div>
 
             {/* Modal de Vista Previa */}
-            {juegoSeleccionado && (() => {
-                const gameData = prepareGameData(juegoSeleccionado);
-                return (
-                    <GamePreview
-                        isOpen={showPreview}
-                        onClose={() => setShowPreview(false)}
-                        gameType={juegoSeleccionado.tipoJuego}
-                        gameData={gameData}
-                    />
-                );
-            })()}
+            {juegoSeleccionado && previewGameData && (
+                <GamePreview
+                    isOpen={showPreview}
+                    onClose={() => setShowPreview(false)}
+                    gameType={juegoSeleccionado.tipoJuego}
+                    gameData={previewGameData}
+                />
+            )}
         </div>
     );
 }
