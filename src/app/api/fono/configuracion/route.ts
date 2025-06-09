@@ -33,7 +33,7 @@ export async function GET(request: Request) {
             FROM "Fonoaudiologo" f
             JOIN "Persona" p ON f."personaId" = p.id
             JOIN "Usuario" u ON u."personaId" = p.id
-            WHERE u.id = ${userId}
+            WHERE u.id = ${BigInt(userId)}
         `;
 
         if (!userData || userData.length === 0) {
@@ -127,7 +127,7 @@ export async function PUT(request: Request) {
             FROM "Fonoaudiologo" f
             JOIN "Persona" p ON f."personaId" = p.id
             JOIN "Usuario" u ON u."personaId" = p.id
-            WHERE u.id = ${userId}
+            WHERE u.id = ${BigInt(userId)}
         `;
 
         return NextResponse.json(updatedUser[0]);

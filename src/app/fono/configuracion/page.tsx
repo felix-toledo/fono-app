@@ -66,7 +66,7 @@ const Configuracion = () => {
 
                 const response = await axios.get('/api/fono/configuracion', {
                     headers: {
-                        'x-session-data': JSON.stringify({ userId: getFonoId() })
+                        'x-session-data': JSON.stringify({ userId: userInfo.UserId })
                     }
                 });
                 setDoctorProfile({
@@ -85,7 +85,7 @@ const Configuracion = () => {
         };
 
         fetchProfile();
-    }, [userInfo, getFonoId]);
+    }, [userInfo]);
 
     // Manejar cambios en los campos del formulario
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -150,7 +150,7 @@ const Configuracion = () => {
 
             await axios.put('/api/fono/configuracion', doctorProfile, {
                 headers: {
-                    'x-session-data': JSON.stringify({ userId: getFonoId() })
+                    'x-session-data': JSON.stringify({ userId: userInfo.UserId })
                 }
             });
             toast.success('Perfil actualizado correctamente. Para ver reflejado el cambio, debes cerrar sesión y volver a iniciarla :)');
@@ -181,7 +181,7 @@ const Configuracion = () => {
                 newPassword: passwordChange.newPassword
             }, {
                 headers: {
-                    'x-session-data': JSON.stringify({ userId: getFonoId() })
+                    'x-session-data': JSON.stringify({ userId: userInfo.UserId })
                 }
             });
 
