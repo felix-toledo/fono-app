@@ -59,6 +59,11 @@ export const Sidebar = () => {
         }
     }, []);
 
+    // Agregar después de los otros useEffect
+    useEffect(() => {
+        setIsOpen(false);
+    }, [pathname]);
+
     const handleLogout = () => {
         if (typeof window !== 'undefined') {
             localStorage.removeItem('userSession');
@@ -69,6 +74,9 @@ export const Sidebar = () => {
     const isFono = userInfo?.perfil === 'FONO';
     const isPaciente = userInfo?.perfil === 'PACIENTE';
 
+    const handleNavClick = () => {
+        setIsOpen(false);
+    };
 
     return (
         <>
@@ -127,27 +135,28 @@ export const Sidebar = () => {
                             <Link
                                 href="/fono"
                                 className={getNavLinkClass(pathname === '/fono')}
+                                onClick={handleNavClick}
                             >
                                 <Home size={20} className="mr-2" />
                                 <span>Inicio</span>
                             </Link>
 
-                            <Link href="/fono/pacientes" className={getNavLinkClass(pathname === '/fono/pacientes')}>
+                            <Link href="/fono/pacientes" className={getNavLinkClass(pathname === '/fono/pacientes')} onClick={handleNavClick}>
                                 <Users size={20} className="mr-2" />
                                 <span>Pacientes</span>
                             </Link>
 
-                            <Link href="/fono/turnos" className={getNavLinkClass(pathname === '/fono/turnos')}>
+                            <Link href="/fono/turnos" className={getNavLinkClass(pathname === '/fono/turnos')} onClick={handleNavClick}>
                                 <Calendar size={20} className="mr-2" />
                                 <span>Turnos</span>
                             </Link>
 
-                            <Link href="/fono/historia-clinica" className={getNavLinkClass(pathname === '/fono/historia-clinica')}>
+                            <Link href="/fono/historia-clinica" className={getNavLinkClass(pathname === '/fono/historia-clinica')} onClick={handleNavClick}>
                                 <FileText size={20} className="mr-2" />
                                 <span>Historia Clínica</span>
                             </Link>
 
-                            <Link href="/fono/juegos" className={getNavLinkClass(pathname === '/fono/juegos')}>
+                            <Link href="/fono/juegos" className={getNavLinkClass(pathname === '/fono/juegos')} onClick={handleNavClick}>
                                 <Gamepad2 size={20} className="mr-2" />
                                 <span>Juegos</span>
                             </Link>
@@ -158,7 +167,7 @@ export const Sidebar = () => {
                                 </h3>
                             </div>
 
-                            <Link href="/fono/configuracion" className={getNavLinkClass(pathname === '/fono/configuracion')}>
+                            <Link href="/fono/configuracion" className={getNavLinkClass(pathname === '/fono/configuracion')} onClick={handleNavClick}>
                                 <Settings size={20} className="mr-2" />
                                 <span>Configuración</span>
                             </Link>
@@ -169,30 +178,34 @@ export const Sidebar = () => {
                             <Link
                                 href="/paciente"
                                 className={getNavLinkClass(pathname === '/paciente')}
+                                onClick={handleNavClick}
                             >
                                 <Home size={20} className="mr-2" />
                                 <span>Inicio</span>
                             </Link>
 
-                            <Link href="/paciente/turnos" className={getNavLinkClass(pathname === '/paciente/turnos')}>
+                            <Link href="/paciente/turnos" className={getNavLinkClass(pathname === '/paciente/turnos')} onClick={handleNavClick}>
                                 <Calendar size={20} className="mr-2" />
                                 <span>Mis Turnos</span>
                             </Link>
 
-                            <Link href="/paciente/juegos" className={getNavLinkClass(pathname === '/paciente/juegos')}>
+                            <Link href="/paciente/juegos" className={getNavLinkClass(pathname === '/paciente/juegos')} onClick={handleNavClick}>
                                 <Gamepad2 size={20} className="mr-2" />
                                 <span>Juegos</span>
                             </Link>
 
                             <button
-                                onClick={() => toast.info('Esta opción estará disponible próximamente', {
-                                    position: "top-right",
-                                    autoClose: 3000,
-                                    hideProgressBar: false,
-                                    closeOnClick: true,
-                                    pauseOnHover: true,
-                                    draggable: true,
-                                })}
+                                onClick={() => {
+                                    toast.info('Esta opción estará disponible próximamente', {
+                                        position: "top-right",
+                                        autoClose: 3000,
+                                        hideProgressBar: false,
+                                        closeOnClick: true,
+                                        pauseOnHover: true,
+                                        draggable: true,
+                                    });
+                                    handleNavClick();
+                                }}
                                 className={getNavLinkClass(pathname === '/paciente/sobre-mi')}
                             >
                                 <User size={20} className="mr-2" />
@@ -202,7 +215,10 @@ export const Sidebar = () => {
                     ) : null}
 
                     <button
-                        onClick={handleLogout}
+                        onClick={() => {
+                            handleLogout();
+                            handleNavClick();
+                        }}
                         className="mt-4 text-gray-700 flex items-center p-3 rounded-lg hover:bg-red-50 hover:text-danger transition-colors"
                     >
                         <LogOut size={20} className="mr-2" />
