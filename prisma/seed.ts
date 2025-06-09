@@ -9,16 +9,16 @@ async function main() {
 
     const persona = await prisma.persona.create({
         data: {
-            nombre: 'Gilda',
-            apellido: 'Romero',
-            dni: 20876532,
+            nombre: 'Julian',
+            apellido: 'Kartun',
+            dni: 98615722,
             fechaNac: new Date('1990-01-01'),
             direccion: 'Calle Principal 123',
             telefono: 1234567890,
-            mail: 'fonoprueba@gmail.com',
+            mail: 'prueba@gmail.com',
             usuario: {
                 create: {
-                    username: 'gilda',
+                    username: 'prueba',
                     passwordHash: hashedPassword,
                     perfil: TipoUsuario.FONO,
                     activo: true

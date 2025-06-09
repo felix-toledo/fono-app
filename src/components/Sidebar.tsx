@@ -212,7 +212,7 @@ export const Sidebar = () => {
 
                 <div className="mt-auto pt-4 border-t border-border text-sm">
                     <p className="text-gray-600">{currentDate}</p>
-                    <p className="text-gray-400 text-xs mt-4">v 1.1<br />05042025</p>
+                    <p className="text-gray-400 text-xs mt-4">v 2.0Beta<br />09052025</p>
                 </div>
             </aside>
         </>
